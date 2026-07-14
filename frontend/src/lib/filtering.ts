@@ -229,6 +229,7 @@ export function filterRawSessions(
     includeNonProd?: boolean; 
     includeNonSuccess?: boolean; 
     includeValidation?: boolean;
+    canonicalizeProductLine?: boolean;
   },
 ): RawSessionRow[] {
   // Production-only scoping is page-scoped: the Home page stamps
@@ -246,7 +247,8 @@ export function filterRawSessions(
   // "VALIDATION" rows. opts.includeValidation overrides (the CSV export keeps
   // them).
   const includeValidation = opts?.includeValidation ?? !(filters.excludeValidation ?? false);
-  const key = `${includeNonProd ? "all" : "prod"}${includeNonSuccess ? "" : "succ"}${includeValidation ? "" : "noval"}${filterKey(filters)}`;
+  const canonicalizeProductLine = opts?.canonicalizeProductLine ?? true;
+  const key = `${includeNonProd ? "all" : "prod"}${includeNonSuccess ? "" : "succ"}${includeValidation ? "" : "noval"}${canonicalizeProductLine ? "canon" : "rawpl"}${filterKey(filters)}`;
   const cached = filteredCache.get(key);
   if (cached) return cached;
 
@@ -288,7 +290,11 @@ export function filterRawSessions(
     // SEALING only. Spread into a new object to keep the cached raw row intact.
     const row = getRawSessionAt(i);
     const pl = canonicalProductLine(row.productLine);
-    out.push(pl === row.productLine ? row : { ...row, productLine: pl });
+    out.push(
+      canonicalizeProductLine && pl !== row.productLine
+        ? { ...row, productLine: pl }
+        : row,
+    );
   }
 
   return cacheResult(key, out);

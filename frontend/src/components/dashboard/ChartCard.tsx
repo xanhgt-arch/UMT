@@ -11,9 +11,8 @@ import {
 } from "@/components/ui/tooltip";
 import { useChartFilters } from "@/lib/filter-context";
 import {
-  buildChartRawSessionsCsv,
   chartCsvFilename,
-  downloadCsv,
+  downloadClientReportCsv,
   type CsvRow,
 } from "@/lib/chart-export";
 import { cn } from "@/lib/utils";
@@ -127,8 +126,7 @@ function ChartCsvButton({
   const { effective } = useChartFilters(filter.id, filter.applicable);
 
   const handleDownload = () => {
-    const rows = exportRows ?? buildChartRawSessionsCsv(effective);
-    downloadCsv(chartCsvFilename(), rows);
+    downloadClientReportCsv(effective, chartCsvFilename());
   };
 
   return (

@@ -34,6 +34,24 @@ const REGION_FULL: Record<Region, string> = {
   SA: "South America",
 };
 
+const DOMAIN_MAPPING: Record<string, string> = {
+  ATIBAIA: "Atibaia", ASIA: "Asia", AUBURN: "AUBURN", BATTIPAGLIA: "Battipaglia",
+  CHONGQING: "Chongqing", COVENTRY: "Coventry", CSAID: "CSAID", ITALY: "Italy",
+  KOREA: "Korea", KUNSHAN: "Kunshan", LINDAU: "Lindau", MANNHEIM: "Mannheim",
+  MERGON: "Mergon", MTC: "MTC", MYCORP: "MYCORP", NORTHVILLE: "Northville",
+  POLAND: "Poland", SERBIA: "Serbia", SHANGHAI: "Shanghai", SPAIN: "Spain",
+  TATA: "TATA", VITRE: "Vitre", YOKOHAMA: "Yokohama",
+};
+
+const LEGACY_REMOVED_APPS = new Set([
+  "CLIPS AND ADAPTORS", "HIT", "FLANGE THICKNESS", "TEST_APP",
+]);
+
+const SMART_CVT_REMOVED_FUNCTIONALITIES = new Set([
+  "COMBO BLOCK", "SMOOTH BLOCK", "CONVOLUTE BLOCK", "BLOCK CREATION",
+  "EXECUTION", "CREATE BLOCK", "SMOOTH BORE",
+]);
+
 const APP_TAGS: Record<string, string> = {
   DLC: "DLC",
   AUTOSECTION: "AUTO SECTION",
@@ -160,6 +178,26 @@ export function chartCsvFilename(): string {
   return `usage-report-${stamp}.csv`;
 }
 
+function clientReportDate(): string {
+  const now = new Date();
+  return `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, "0")}-${String(now.getDate()).padStart(2, "0")}`;
+}
+
+export function downloadClientReportCsv(filters: FilterState, filename: string): void {
+  const rows = buildChartRawSessionsCsv(filters);
+  const csv = toCsv(rows.length > 0 ? rows : [{ message: "No data matches the current filters" }]);
+  const content = `\uFEFFUsageData ${clientReportDate()}\r\n\r\n${csv}`;
+  const blob = new Blob([content], { type: "text/csv;charset=utf-8" });
+  const url = URL.createObjectURL(blob);
+  const link = document.createElement("a");
+  link.href = url;
+  link.download = filename.endsWith(".csv") ? filename : `${filename}.csv`;
+  document.body.appendChild(link);
+  link.click();
+  link.remove();
+  URL.revokeObjectURL(url);
+}
+
 /**
  * Per-chart download shape: one row per session. Column names match the
  * page-level Home export shape so downstream analysts see a consistent schema
@@ -181,15 +219,22 @@ export function buildChartRawSessionsCsv(filters: FilterState): CsvRow[] {
     includeNonProd: true,
     includeNonSuccess: true,
     includeValidation: true,
+    canonicalizeProductLine: false,
   })
+    .filter((row) => {
+      const rawApplication = row.application.trim().toUpperCase();
+      if (LEGACY_REMOVED_APPS.has(rawApplication)) return false;
+      const applicationName = mapApplicationName(row.application);
+      return !(applicationName === "SMART CVT" && SMART_CVT_REMOVED_FUNCTIONALITIES.has(row.functionality.trim().toUpperCase()));
+    })
     .map((row) => ({
       ApplicationName: mapApplicationName(row.application),
-      Functionality: row.functionality,
+      Functionality: row.functionality.toUpperCase(),
       cadTool: row.cad,
-      Domain: row.domain,
+      Domain: DOMAIN_MAPPING[row.domain.trim().toUpperCase()] ?? row.domain.trim().toUpperCase(),
       UserID: row.user,
       MachineID: row.machine,
-      ProductLine: row.productLine,
+      ProductLine: row.productLine === "FTS" || row.productLine === "FBD" ? "FLUIDS" : row.productLine,
       Status: row.status,
       Region: row.region,
       StartDate: formatCsvDate(row.startTime),

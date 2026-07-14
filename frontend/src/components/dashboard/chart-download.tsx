@@ -2,7 +2,7 @@ import { createContext, useContext, useEffect } from "react";
 import { Download } from "lucide-react";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
-import { downloadCsv, type CsvRow } from "@/lib/csv";
+import { downloadCsv, type CsvRow } from "@/lib/chart-export";
 
 export type ChartDownload = {
   /** Base file name (no extension) — slugified when the file is saved. */
@@ -44,7 +44,7 @@ export function useChartDownload(
 
 export function ChartDownloadButton({ download }: { download: ChartDownload }) {
   const handleClick = () => {
-    downloadCsv(download.filename, download.rows);
+    downloadCsv(download.filename, [...download.rows]);
     const count = download.rows.length;
     toast.success(`Downloaded ${count} row${count === 1 ? "" : "s"} as CSV`);
   };
