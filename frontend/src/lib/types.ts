@@ -94,6 +94,9 @@ export interface RawSessionRow {
   hardware: Hardware;
   isProd: boolean;
   customerName: string | null;
+  /** Backend-formatted legacy report dates; timestamp values remain unchanged. */
+  exportStartDate?: string | null;
+  exportStopDate?: string | null;
 }
 
 // VDI user — fields per the dashboard admin UI:

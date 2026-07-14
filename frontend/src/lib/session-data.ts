@@ -24,6 +24,8 @@ export type CompactRawSession = [
   Hardware,
   boolean,
   string | null,
+  string | null,
+  string | null,
 ];
 
 export const COMPACT_SESSION = {
@@ -50,6 +52,8 @@ export const COMPACT_SESSION = {
   hardware: 20,
   isProd: 21,
   customerName: 22,
+  exportStartDate: 23,
+  exportStopDate: 24,
 } as const;
 
 async function loadCompactSessions(): Promise<CompactRawSession[]> {
@@ -130,6 +134,8 @@ export function compactToRawSession(s: CompactRawSession): RawSessionRow {
     hardware: s[COMPACT_SESSION.hardware],
     isProd: s[COMPACT_SESSION.isProd],
     customerName: s[COMPACT_SESSION.customerName],
+    exportStartDate: s[COMPACT_SESSION.exportStartDate],
+    exportStopDate: s[COMPACT_SESSION.exportStopDate],
   };
 }
 

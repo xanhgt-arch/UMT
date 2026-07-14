@@ -1,5 +1,6 @@
 using MySqlConnector;
 using Newtonsoft.Json;
+using System.Globalization;
 using UMT.Backend.Models;
 
 namespace UMT.Backend.Services
@@ -140,7 +141,13 @@ namespace UMT.Backend.Services
                 //false and dropped every row from the production-only charts.
                 row.IsProd,
 
-                row.CustomerName
+                row.CustomerName,
+
+                // Keep the existing timestamp fields unchanged. These two
+                // appended fields reproduce the legacy client report's
+                // server-side DateTime date conversion for CSV export only.
+                validStart ? start.ToString("MM/dd/yyyy", CultureInfo.InvariantCulture) : null,
+                validStop ? stop.ToString("MM/dd/yyyy", CultureInfo.InvariantCulture) : null
             };
         }
 
