@@ -117,7 +117,6 @@ export function ChartCard({
 function ChartCsvButton({
   title,
   filter,
-  exportRows,
 }: {
   title: string;
   filter: { id: string; applicable: readonly FilterDim[] };
