@@ -1,0 +1,50 @@
+# ───────────────────────────────────────────────────────────────
+#  UMT — root .gitignore
+#  (frontend/ keeps its own .gitignore for the React/Vite app)
+# ───────────────────────────────────────────────────────────────
+
+# ── Secrets / environment (NEVER commit) ──────────────────────
+.env
+.env.*
+*.env
+!.env.example
+!.env.sample
+appsettings.*.local.json
+secrets.json
+
+# ── .NET build output ─────────────────────────────────────────
+[Bb]in/
+[Oo]bj/
+[Oo]ut/
+artifacts/
+project.lock.json
+*.user
+*.suo
+*.userprefs
+
+# ── IDE / editor ──────────────────────────────────────────────
+.vs/
+.idea/
+*.swp
+*.swo
+# .vscode is intentionally not ignored at the root so shared
+# launch/task configs can be committed; add it here if undesired.
+
+# ── Logs & temp ───────────────────────────────────────────────
+*.log
+logs/
+*.tmp
+*.cache
+
+# ── OS cruft ──────────────────────────────────────────────────
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# ── Published / deploy output ─────────────────────────────────
+# The publish folder is build output (produced locally by
+# scripts/rebuild.ps1) and holds the machine-specific .env — never commit it.
+# If it was ever tracked, untrack it once with:
+#   git rm -r --cached backend/publish backend/UMT.Backend.New/publish
+backend/publish/
+**/publish/

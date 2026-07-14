@@ -1,0 +1,6 @@
+@UMT.Backend.New_HostAddress = http://localhost:5290
+
+GET {{UMT.Backend.New_HostAddress}}/weatherforecast/
+Accept: application/json
+
+###
