@@ -164,6 +164,7 @@ namespace UMT.Backend.Controllers
                 cmd.Parameters.AddWithValue("@mb", currentUser);
 
                 await cmd.ExecuteNonQueryAsync();
+                await SyncUsageDomainAsync(conn, userId, domain, region);
 
                 return Ok(new
                 {
@@ -233,6 +234,8 @@ namespace UMT.Backend.Controllers
                 if (rows == 0)
                     return NotFound(new { message = "Record not found" });
 
+                await SyncUsageDomainAsync(conn, routeUserId, domain, region);
+
                 return Ok(new
                 {
                     fullName = routeUserId,
@@ -283,6 +286,33 @@ namespace UMT.Backend.Controllers
             {
                 return StatusCode(500, new { message = ex.ToString() });
             }
+        }
+
+        // Keep the usage history aligned with the user's current domain record,
+        // matching the legacy HomeController behavior. The legacy application
+        // only corrected usage rows from the last 365 days, so preserve that
+        // scope and leave older historical data unchanged.
+        private async Task SyncUsageDomainAsync(
+            MySqlConnection conn,
+            string userId,
+            string domain,
+            string region)
+        {
+            string usageTable = _factory.TableName("mst_tool_usage");
+
+            var cmd = new MySqlCommand(
+                $"UPDATE {usageTable} " +
+                "SET Domain=@d, Region=@r " +
+                "WHERE LOWER(UserID)=LOWER(@u) " +
+                "AND StartTime >= DATE_SUB(NOW(), INTERVAL 365 DAY) " +
+                "AND (Domain IS NULL OR Domain <> @d OR Region IS NULL OR Region <> @r)",
+                conn);
+
+            cmd.Parameters.AddWithValue("@u", userId);
+            cmd.Parameters.AddWithValue("@d", domain);
+            cmd.Parameters.AddWithValue("@r", region);
+
+            await cmd.ExecuteNonQueryAsync();
         }
     }
 
