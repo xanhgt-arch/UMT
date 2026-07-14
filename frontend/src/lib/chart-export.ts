@@ -115,20 +115,25 @@ function mapApplicationName(value: string): string {
 }
 
 function formatCsvDate(value: unknown): string {
-  if (!value) return "";
+  const text = String(value ?? "").trim();
+  if (!text) return "";
 
-  const d = new Date(String(value));
+  // Preserve the source calendar date. Parsing an ISO timestamp with
+  // `new Date()` and then using local getters shifts some UTC records by a day
+  // in browsers whose timezone is ahead of UTC.
+  const iso = /^(\d{4})-(\d{2})-(\d{2})/.exec(text);
+  if (iso) return `${iso[2]}/${iso[3]}/${iso[1]}`;
 
-  if (isNaN(d.getTime())) {
-    return String(value);
+  const mdy = /^(\d{1,2})[/-](\d{1,2})[/-](\d{4})/.exec(text);
+  if (mdy) {
+    return `${mdy[1].padStart(2, "0")}/${mdy[2].padStart(2, "0")}/${mdy[3]}`;
   }
 
-  // Zero-padded MM/DD/YYYY, matching the client's primary export (e.g. 01/02/2025).
-  const mm = String(d.getMonth() + 1).padStart(2, "0");
-  const dd = String(d.getDate()).padStart(2, "0");
-  const yyyy = d.getFullYear();
+  return text;
+}
 
-  return `${mm}/${dd}/${yyyy}`;
+function sortSessionsForCsv<T extends { startMs: number }>(rows: T[]): T[] {
+  return rows.slice().sort((a, b) => a.startMs - b.startMs);
 }
 
 function csvCell(value: CsvValue): string {
@@ -186,7 +191,7 @@ function clientReportDate(): string {
 export function downloadClientReportCsv(filters: FilterState, filename: string): void {
   const rows = buildChartRawSessionsCsv(filters);
   const csv = toCsv(rows.length > 0 ? rows : [{ message: "No data matches the current filters" }]);
-  const content = `\uFEFFUsageData ${clientReportDate()}\r\n\r\n${csv}`;
+  const content = `UsageData ${clientReportDate()}\r\n\r\n${csv}\r\n`;
   const blob = new Blob([content], { type: "text/csv;charset=utf-8" });
   const url = URL.createObjectURL(blob);
   const link = document.createElement("a");
@@ -209,24 +214,23 @@ export function downloadClientReportCsv(filters: FilterState, filename: string):
  * user's explicit filters (date range, application, region, product line, …)
  * still apply; only the auto-stamped display scope is bypassed.
  *
- * Row order: the source session array is stored newest-first (which is the
- * order the Sessions table and charts use). The client's primary export is
- * oldest-first, so we reverse the rows here — scoped to the export only, so the
- * on-screen newest-first ordering is untouched.
+ * Row order: the client export is oldest-first. Sort a copied array here so
+ * the cached/session-table order is not changed.
  */
 export function buildChartRawSessionsCsv(filters: FilterState): CsvRow[] {
-  return filterRawSessions(filters, {
+  const sessions = sortSessionsForCsv(filterRawSessions(filters, {
     includeNonProd: true,
     includeNonSuccess: true,
     includeValidation: true,
     canonicalizeProductLine: false,
-  })
-    .filter((row) => {
-      const rawApplication = row.application.trim().toUpperCase();
-      if (LEGACY_REMOVED_APPS.has(rawApplication)) return false;
-      const applicationName = mapApplicationName(row.application);
-      return !(applicationName === "SMART CVT" && SMART_CVT_REMOVED_FUNCTIONALITIES.has(row.functionality.trim().toUpperCase()));
-    })
+  }).filter((row) => {
+    const rawApplication = row.application.trim().toUpperCase();
+    if (LEGACY_REMOVED_APPS.has(rawApplication)) return false;
+    const applicationName = mapApplicationName(row.application);
+    return !(applicationName === "SMART CVT" && SMART_CVT_REMOVED_FUNCTIONALITIES.has(row.functionality.trim().toUpperCase()));
+  }));
+
+  return sessions
     .map((row) => ({
       ApplicationName: mapApplicationName(row.application),
       Functionality: row.functionality.toUpperCase(),
@@ -242,11 +246,7 @@ export function buildChartRawSessionsCsv(filters: FilterState): CsvRow[] {
       isProd: row.isProd ? "true" : "false",
       isVDI: row.hardware === "VDI" ? "true" : "false",
       CustomerName: row.customerName || "null",
-    }))
-    // Oldest-first, matching the client's primary export. `.map` already
-    // returns a fresh array (the filterRawSessions result is cached), so this
-    // in-place reverse never mutates the shared cache.
-    .reverse();
+    }));
 }
 
 export function buildChartCsvRows(chartId: string, filters: FilterState): CsvRow[] {
@@ -344,11 +344,11 @@ function rawSessionRows(filters: FilterState): CsvRow[] {
   // Raw-session dump: keep every row (override the Home page's display-only
   // production/success/validation scope) and emit oldest-first, same as
   // buildChartRawSessionsCsv.
-  return filterRawSessions(filters, {
+  return sortSessionsForCsv(filterRawSessions(filters, {
     includeNonProd: true,
     includeNonSuccess: true,
     includeValidation: true,
-  })
+  }))
     .map((row) => ({
       ApplicationName: mapApplicationName(row.application),
       Functionality: row.functionality,
@@ -364,8 +364,7 @@ function rawSessionRows(filters: FilterState): CsvRow[] {
       isProd: row.isProd ? "true" : "false",
       isVDI: row.hardware === "VDI" ? "true" : "false",
       CustomerName: row.customerName || "null",
-    }))
-    .reverse();
+    }));
 }
 
 function monthTotals(filters: FilterState): number[] {

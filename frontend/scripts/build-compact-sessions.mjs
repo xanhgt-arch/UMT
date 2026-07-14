@@ -24,6 +24,19 @@ function mapStatus(status) {
   return "Completed";
 }
 
+function formatExportDate(value) {
+  const text = String(value ?? "").trim();
+  const iso = /^(\d{4})-(\d{2})-(\d{2})/.exec(text);
+  if (iso) return `${iso[2]}/${iso[3]}/${iso[1]}`;
+
+  const mdy = /^(\d{1,2})[/-](\d{1,2})[/-](\d{4})/.exec(text);
+  if (mdy) {
+    return `${mdy[1].padStart(2, "0")}/${mdy[2].padStart(2, "0")}/${mdy[3]}`;
+  }
+
+  return null;
+}
+
 function normalizeRow(row, index) {
   const start = new Date(row.StartTime);
   const stop = row.StopTime ? new Date(row.StopTime) : null;
@@ -53,6 +66,9 @@ function normalizeRow(row, index) {
     mapStatus(row.Status),
     row.IsVDI ? "VDI" : "Non-VDI",
     row.IsProd ?? false,
+    row.CustomerName ?? null,
+    formatExportDate(row.StartTime),
+    formatExportDate(row.StopTime),
   ];
 }
 
