@@ -132,6 +132,17 @@ function formatCsvDate(value: unknown): string {
   return text;
 }
 
+function formatLegacyDate(value: number | null | undefined): string {
+  if (value === null || value === undefined || !Number.isFinite(value)) return "";
+
+  // ChartsController returned DateTime values. The legacy browser then
+  // formatted those serialized timestamps in the browser's local timezone.
+  // Recreate that behavior from the canonical epoch value rather than using
+  // the server-side calendar-date helper, which loses the timezone rollover.
+  const date = new Date(value);
+  return `${String(date.getMonth() + 1).padStart(2, "0")}/${String(date.getDate()).padStart(2, "0")}/${date.getFullYear()}`;
+}
+
 function sortSessionsForCsv<T extends { startMs: number }>(rows: T[]): T[] {
   return rows.slice().sort((a, b) => a.startMs - b.startMs);
 }
@@ -241,8 +252,8 @@ export function buildChartRawSessionsCsv(filters: FilterState): CsvRow[] {
       ProductLine: row.productLine === "FTS" || row.productLine === "FBD" ? "FLUIDS" : row.productLine,
       Status: row.status,
       Region: row.region,
-      StartDate: row.exportStartDate ?? formatCsvDate(row.startTime),
-      StopDate: row.exportStopDate ?? formatCsvDate(row.stopTime),
+      StartDate: formatLegacyDate(row.startMs) || formatCsvDate(row.startTime),
+      StopDate: formatLegacyDate(row.stopMs) || formatCsvDate(row.stopTime),
       isProd: row.isProd ? "true" : "false",
       isVDI: row.hardware === "VDI" ? "true" : "false",
       CustomerName: row.customerName || "null",

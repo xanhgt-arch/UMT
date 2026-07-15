@@ -56,7 +56,13 @@ namespace UMT.Backend.Services
             using var conn = _factory.CreateConnection();
             await conn.OpenAsync();
 
-            string sql = $"SELECT * FROM {_factory.TableName("mst_tool_usage")} ORDER BY StartTime DESC";
+            // The legacy ChartsController materialized ToolTracking in its
+            // natural/SrNo order and then applied a stable ascending
+            // StartTime sort.  The frontend export also sorts by startMs,
+            // so this query must preserve SrNo order for equal timestamps.
+            // Ordering DESC here reverses those ties and makes otherwise
+            // identical export rows swap positions.
+            string sql = $"SELECT * FROM {_factory.TableName("mst_tool_usage")} ORDER BY SrNo ASC";
 
             using var cmd = new MySqlCommand(sql, conn);
             using var reader = await cmd.ExecuteReaderAsync();
