@@ -132,14 +132,21 @@ function formatCsvDate(value: unknown): string {
   return text;
 }
 
-function formatLegacyDate(value: number | null | undefined): string {
-  if (value === null || value === undefined || !Number.isFinite(value)) return "";
+function formatLegacyDate(value: unknown): string {
+  const text = String(value ?? "").trim();
+  if (!text) return "";
 
-  // ChartsController returned DateTime values. The legacy browser then
-  // formatted those serialized timestamps in the browser's local timezone.
-  // Recreate that behavior from the canonical epoch value rather than using
-  // the server-side calendar-date helper, which loses the timezone rollover.
-  const date = new Date(value);
+  // ChartsController returned DateTime values backed by UTC database
+  // timestamps. The legacy browser then formatted those serialized values in
+  // the browser's local timezone. The compact endpoint exposes the timestamp
+  // as `yyyy-MM-dd HH:mm:ss.fff`, so restore its UTC meaning before applying
+  // the local calendar conversion. This preserves the legacy midnight
+  // rollover that a server-only date string loses.
+  const source = /^(\d{4}-\d{2}-\d{2})[ T](\d{2}:\d{2}:\d{2}(?:\.\d{1,3})?)(?:Z)?$/.exec(text);
+  const date = source
+    ? new Date(`${source[1]}T${source[2]}Z`)
+    : new Date(text);
+  if (Number.isNaN(date.getTime())) return "";
   return `${String(date.getMonth() + 1).padStart(2, "0")}/${String(date.getDate()).padStart(2, "0")}/${date.getFullYear()}`;
 }
 
@@ -252,8 +259,8 @@ export function buildChartRawSessionsCsv(filters: FilterState): CsvRow[] {
       ProductLine: row.productLine === "FTS" || row.productLine === "FBD" ? "FLUIDS" : row.productLine,
       Status: row.status,
       Region: row.region,
-      StartDate: formatLegacyDate(row.startMs) || formatCsvDate(row.startTime),
-      StopDate: formatLegacyDate(row.stopMs) || formatCsvDate(row.stopTime),
+      StartDate: formatLegacyDate(row.startTime) || formatLegacyDate(row.startMs) || formatCsvDate(row.startTime),
+      StopDate: formatLegacyDate(row.stopTime) || formatLegacyDate(row.stopMs) || formatCsvDate(row.stopTime),
       isProd: row.isProd ? "true" : "false",
       isVDI: row.hardware === "VDI" ? "true" : "false",
       CustomerName: row.customerName || "null",
