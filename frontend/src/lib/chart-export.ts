@@ -150,6 +150,16 @@ function formatLegacyDate(value: unknown): string {
   return `${String(date.getMonth() + 1).padStart(2, "0")}/${String(date.getDate()).padStart(2, "0")}/${date.getFullYear()}`;
 }
 
+function exportDate(
+  legacyDate: string | null | undefined,
+  timestamp: unknown,
+): string {
+  // The backend materializes the legacy MVC date conversion explicitly. Use
+  // it when available instead of reparsing the timestamp in the browser,
+  // which can apply a timezone conversion and shift the exported date.
+  return legacyDate?.trim() || formatCsvDate(timestamp);
+}
+
 function sortSessionsForCsv<T extends { startMs: number }>(rows: T[]): T[] {
   return rows.slice().sort((a, b) => a.startMs - b.startMs);
 }
@@ -259,8 +269,8 @@ export function buildChartRawSessionsCsv(filters: FilterState): CsvRow[] {
       ProductLine: row.productLine === "FTS" || row.productLine === "FBD" ? "FLUIDS" : row.productLine,
       Status: row.status,
       Region: row.region,
-      StartDate: formatLegacyDate(row.startTime) || formatLegacyDate(row.startMs) || formatCsvDate(row.startTime),
-      StopDate: formatLegacyDate(row.stopTime) || formatLegacyDate(row.stopMs) || formatCsvDate(row.stopTime),
+      StartDate: exportDate(row.exportStartDate, row.startTime),
+      StopDate: exportDate(row.exportStopDate, row.stopTime),
       isProd: row.isProd ? "true" : "false",
       isVDI: row.hardware === "VDI" ? "true" : "false",
       CustomerName: row.customerName || "null",
@@ -377,8 +387,8 @@ function rawSessionRows(filters: FilterState): CsvRow[] {
       ProductLine: row.productLine,
       Status: row.status,
       Region: row.region,
-      StartDate: formatCsvDate(row.startTime),
-      StopDate: formatCsvDate(row.stopTime),
+      StartDate: exportDate(row.exportStartDate, row.startTime),
+      StopDate: exportDate(row.exportStopDate, row.stopTime),
       isProd: row.isProd ? "true" : "false",
       isVDI: row.hardware === "VDI" ? "true" : "false",
       CustomerName: row.customerName || "null",
