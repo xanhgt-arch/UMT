@@ -1,0 +1,226 @@
+﻿@model UsageMonitoringTool_WebApplication.Models.DomainDetails
+
+@{
+    ViewBag.Title = "Edit Domain User";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+<div class="container-fluid">
+    <h2>Edit Details of Domain Users @Model.UserId</h2>
+    <br />
+    @using (Html.BeginForm())
+    {
+        @Html.AntiForgeryToken()    
+
+<div class="form-horizontal">
+
+    <hr />
+    @Html.ValidationSummary(true, "", new { @class = "text-danger" })
+    @Html.HiddenFor(model => model.SrNo)
+    <div class="form-group">
+        @Html.LabelFor(model => model.Region, new { @class = "control-label col-md-2" })
+        <div class="col-md-10">
+
+            @Html.DropDownListFor(
+                model => model.Region,
+                (IEnumerable<SelectListItem>)ViewBag.RegionList,
+                "-- Select Region --",
+                new { @class = "form-control tall-dropdown", id = "RegionDropdown", style = "height:35px;" }
+            )
+
+            @Html.ValidationMessageFor(model => model.Region, "", new { @class = "text-danger" })
+
+            <input type="text"
+                   id="NewRegionText"
+                   name="NewRegion"
+                   class="form-control"
+                   placeholder="Enter new region"
+                   style="display:none;margin-top:5px;" />
+        </div>
+    </div>
+    <div class="form-group">
+        @Html.LabelFor(model => model.Domain, new { @class = "control-label col-md-2" })
+        <div class="col-md-10">
+
+            @Html.DropDownListFor(
+                model => model.Domain,
+                (IEnumerable<SelectListItem>)ViewBag.DomainList,
+                "-- Select Domain --",
+                new { @class = "form-control tall-dropdown", id = "DomainDropdown", style = "height:35px;" }
+            )
+
+            @Html.ValidationMessageFor(model => model.Domain, "", new { @class = "text-danger" })
+
+            <input type="text"
+                   id="NewDomainText"
+                   name="NewDomain"
+                   class="form-control"
+                   placeholder="Enter new domain"
+                   style="display:none;margin-top:5px;" />
+        </div>
+    </div>
+    <div class="form-group">
+        @Html.LabelFor(model => model.UserId, htmlAttributes: new { @class = "control-label col-md-2" })
+        <div class="col-md-10">
+            @Html.EditorFor(model => model.UserId, new { htmlAttributes = new { @class = "form-control" } })
+            @Html.ValidationMessageFor(model => model.UserId, "", new { @class = "text-danger" })
+        </div>
+    </div>
+
+    @*<div class="form-group">
+        @Html.LabelFor(model => model.Domain, htmlAttributes: new { @class = "control-label col-md-2" })
+        <div class="col-md-10">
+            @Html.EditorFor(model => model.Domain, new { htmlAttributes = new { @class = "form-control" } })
+            @Html.ValidationMessageFor(model => model.Domain, "", new { @class = "text-danger" })
+        </div>
+    </div>
+    <div class="form-group">
+        @Html.LabelFor(model => model.Region, htmlAttributes: new { @class = "control-label col-md-2" })
+        <div class="col-md-10">
+            @Html.EditorFor(model => model.Region, new { htmlAttributes = new { @class = "form-control" } })
+            @Html.ValidationMessageFor(model => model.Region, "", new { @class = "text-danger" })
+        </div>
+    </div>*@
+
+    @*<div class="form-group">
+            @Html.LabelFor(model => model.CreatedDate, htmlAttributes: new { @class = "control-label col-md-2" })
+            <div class="col-md-10">
+                @Html.EditorFor(model => model.CreatedDate, new { htmlAttributes = new { @class = "form-control" } })
+                @Html.ValidationMessageFor(model => model.CreatedDate, "", new { @class = "text-danger" })
+            </div>
+        </div>
+
+        <div class="form-group">
+            @Html.LabelFor(model => model.CreatedBy, htmlAttributes: new { @class = "control-label col-md-2" })
+            <div class="col-md-10">
+                @Html.EditorFor(model => model.CreatedBy, new { htmlAttributes = new { @class = "form-control" } })
+                @Html.ValidationMessageFor(model => model.CreatedBy, "", new { @class = "text-danger" })
+            </div>
+        </div>
+
+        <div class="form-group">
+            @Html.LabelFor(model => model.ModifiedDate, htmlAttributes: new { @class = "control-label col-md-2" })
+            <div class="col-md-10">
+                @Html.EditorFor(model => model.ModifiedDate, new { htmlAttributes = new { @class = "form-control" } })
+                @Html.ValidationMessageFor(model => model.ModifiedDate, "", new { @class = "text-danger" })
+            </div>
+        </div>
+
+        <div class="form-group">
+            @Html.LabelFor(model => model.ModifiedBy, htmlAttributes: new { @class = "control-label col-md-2" })
+            <div class="col-md-10">
+                @Html.EditorFor(model => model.ModifiedBy, new { htmlAttributes = new { @class = "form-control" } })
+                @Html.ValidationMessageFor(model => model.ModifiedBy, "", new { @class = "text-danger" })
+            </div>
+        </div>*@
+
+    <div class="form-group">
+        <div class="col-md-offset-2 col-md-10">
+            <input type="submit" value="Save" class="btn btn-primary" />
+            @Html.ActionLink(
+                "Back",
+                "DomainDetails",
+                null,
+                new { @class = "btn btn-primary", style = "margin-left:10px;" }
+            )
+        </div>
+    </div>
+</div>
+    }    
+</div>
+
+<script>
+
+    $(document).ready(function () {
+        var $j = jQuery.noConflict();
+        $j('#aboutnav').removeClass('active');
+        $j('#homenav').removeClass('active');
+        $j('#usernav').removeClass('active');
+        $j('#domainnav').addClass('active');
+    });
+
+
+$(document).ready(function () {
+
+
+
+    function showDomainAddNewIfRequired() {
+        if ($('#DomainDropdown').val() === 'ADD_NEW') {
+            $('#NewDomainText').show();
+        } else {
+            $('#NewDomainText').hide().val('');
+        }
+    }
+
+    function resetDomainDropdown(optionsHtml) {
+        $('#DomainDropdown')
+            .prop('disabled', false)
+            .html(optionsHtml);
+
+        showDomainAddNewIfRequired();
+    }
+
+
+
+    $('#RegionDropdown').on('change', function () {
+
+        const region = $(this).val();
+
+
+        $('#NewRegionText').hide().val('');
+        $('#NewDomainText').hide().val('');
+
+        if (!region) {
+            $('#DomainDropdown').prop('disabled', true).empty();
+            return;
+        }
+
+
+        if (region === 'ADD_NEW') {
+
+            $('#NewRegionText').show();
+
+
+            resetDomainDropdown(
+                '<option value="ADD_NEW">Add New</option>'
+            );
+
+            return;
+        }
+
+
+        $.get('@Url.Action("GetDomainsByRegion")',
+            { region: region },
+            function (data) {
+
+                let html = '<option value="">-- Select Domain --</option>';
+                html += '<option value="ADD_NEW">Add New</option>';
+
+                $.each(data, function (i, item) {
+                    html += `<option value="${item.Value}">${item.Text}</option>`;
+                });
+
+                resetDomainDropdown(html);
+            }
+        );
+    });
+
+
+
+    $('#DomainDropdown').on('change', function () {
+        showDomainAddNewIfRequired();
+    });
+
+
+    if ($('#RegionDropdown').val() === 'ADD_NEW') {
+        $('#NewRegionText').show();
+    }
+
+
+    showDomainAddNewIfRequired();
+
+});
+
+
+
+
+</script>

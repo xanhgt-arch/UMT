@@ -1,0 +1,374 @@
+﻿
+@{
+    ViewBag.Title = "Index";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+@{
+    List<SelectListItem> listItems3 = new List<SelectListItem>();
+    listItems3.Add(new SelectListItem
+    {
+        Text = "CATIA",
+        Value = "CATIA"
+    });
+    listItems3.Add(new SelectListItem
+    {
+        Text = "NX",
+        Value = "NX"
+    });
+    @*listItems3.Add(new SelectListItem
+    {
+        Text = "SOLIDWORKS",
+        Value = "SOLIDWORKS"
+    });*@
+    listItems3.Add(new SelectListItem
+    {
+        Text = "All",
+        Value = "All",
+        Selected = true
+    });
+
+    List<SelectListItem> listItems = new List<SelectListItem>();
+    listItems.Add(new SelectListItem
+    {
+        Text = "PMC VALIDATION",
+        Value = "PMC VALIDATION"
+    });
+    listItems.Add(new SelectListItem
+    {
+        Text = "PMC EXECUTION",
+        Value = "PMC EXECUTION",
+
+    });
+    listItems.Add(new SelectListItem
+    {
+        Text = "NOTES UTILITY",
+        Value = "NOTES UTILITY",
+
+    });
+    listItems.Add(new SelectListItem
+    {
+        Text = "NOTES UTILITY TITLEBLOCK",
+        Value = "NOTES UTILITY TITLEBLOCK",
+
+    });
+    listItems.Add(new SelectListItem
+    {
+        Text = "BBB",
+        Value = "BBB"
+    });
+
+    listItems.Add(new SelectListItem
+    {
+        Text = "HIT",
+        Value = "HIT"
+    });
+    listItems.Add(new SelectListItem
+    {
+        Text = "CLIPS AND ADAPTERS",
+        Value = "CLIPS AND ADAPTERS"
+    });
+    listItems.Add(new SelectListItem
+    {
+        Text = "All",
+        Value = "All",
+        Selected = true
+    });
+
+    List<SelectListItem> listItems1 = new List<SelectListItem>();
+    listItems1.Add(new SelectListItem
+    {
+        Text = "FBD",
+        Value = "FBD"
+    });
+    listItems1.Add(new SelectListItem
+    {
+        Text = "FTS",
+        Value = "FTS",
+
+    });
+    listItems1.Add(new SelectListItem
+    {
+        Text = "SEALING",
+        Value = "SEALING"
+    });
+
+    listItems1.Add(new SelectListItem
+    {
+        Text = "All",
+        Value = "All",
+        Selected = true
+    });
+
+    List<SelectListItem> listItems2 = new List<SelectListItem>();
+    listItems2.Add(new SelectListItem
+    {
+        Text = "NA",
+        Value = "NA"
+    });
+    listItems2.Add(new SelectListItem
+    {
+        Text = "APAC",
+        Value = "APAC",
+    });
+    listItems2.Add(new SelectListItem
+    {
+        Text = "EU",
+        Value = "EU"
+    });
+    listItems2.Add(new SelectListItem
+    {
+        Text = "All",
+        Value = "All",
+        Selected = true
+    });
+
+}
+
+<div id="panel" class="panel panel-default" style="font-size:12pt; margin:30px">
+    <div class="panel-heading"><b>Filters</b></div>
+    <div id="collapseImport" class="collapse in">
+        <div class="panel-body">
+
+            @*<div class="col-lg-3 col-md-3">
+                    @Html.Label("Appication Name")
+                    @Html.DropDownList("DDL", listItems, "-- Select Status --",new { id = "AUM_AppName"})
+                </div>*@
+            @using (Html.BeginForm(null, null, FormMethod.Post, new { id = "filterApputilization", name = "filterApputilization" }))
+            {
+            <div class="row">
+                @*// Added By Pragya*@
+                <div class="col-lg-3 col-md-3">
+                    @Html.Label("Product Category")
+                    @Html.DropDownList("PC", listItems1, "-- Select Status --", new { id = "AUM_ProductCatagory" })
+                </div>
+
+                <div class="col-lg-3 col-md-3">
+                    @Html.Label("Region")
+                    @Html.DropDownList("Region", listItems2, "-- Select Status --", new { id = "AUM_Region" })
+                </div>
+
+                <div class="col-lg-3 col-md-3">
+                    @Html.Label("CAD Application")
+                    @Html.DropDownList("CAD", listItems3, "-- Select Status --", new { id = "AUM_CAD" })
+                </div>
+                <div class="col-lg-3 col-md-3">
+                    <input class="btn" type="submit" name="AppUtilizationFilter" value="Go" />
+                </div>
+                <input class="btn" type="button" name="dfsdf" value="Go" id="btnunun" />
+
+            </div>
+
+                <div class="row">
+                    <div class="col-lg-3 col-md-3">
+                        @Html.Label("From Date (mm/dd/yyyy)")
+                        <div class="row">
+                            <div class='col-sm-8'>
+                                <div class="form-group">
+                                    <input style="font-size:12pt" type="date" name="fromDate" id="KBEAPP_Datepick1" min="2018-01-01" class="form-control" value="2019-01-01">
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-lg-3 col-md-3">
+                        @Html.Label("ToDate (mm/dd/yyyy)")
+                        <div class="row">
+                            <div class='col-sm-8'>
+                                <div class="form-group">
+                                    <input style="font-size:12pt" type="date" name="toDate" id="KBEAPP_Datepick2" min="2018-01-01" class="form-control" value="2019-01-01">
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    @*<div class="dropdown">
+                            <button type="button" class="btn btn-primary dropdown-toggle" id="dropdownMenuButtonCADApplicationsExport" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false" width="100%">
+                                ExportTo
+                            </button>
+                            <div class="dropdown-menu" id="DropDownMenu123">
+                                <a class="dropdown-item" href="#" id="PDF-7">PDF</a>
+                                <a class="dropdown-item" href="#" id="JPG-7">JPG</a>
+                            </div>
+                        </div>*@
+                </div>
+
+            }
+
+        </div>
+    </div>
+</div>
+
+<div class="row" style="width: 100%; margin:30px;">
+    <div class="col-lg-6">
+        <div id="chartdiv7" , class="chartdiv7"></div>
+    </div>
+</div>
+
+<script>
+    $(document.onload)
+    // Themes begin
+    am4core.useTheme(am4themes_animated);
+
+    // Create chart instance
+    var chart7 = am4core.create("chartdiv7", am4charts.XYChart);
+    //chart7.exporting.menu = new am4core.ExportMenu();
+
+   
+
+    // Create axes
+
+    var categoryAxis = chart7.xAxes.push(new am4charts.CategoryAxis());
+    categoryAxis.dataFields.category = "title";
+    categoryAxis.renderer.grid.template.location = 0;
+    //categoryAxis.renderer.minGridDistance = 30;
+    categoryAxis.renderer.labels.template.rotation = 290;
+    categoryAxis.renderer.labels.template.horizontalCenter = "right";
+    categoryAxis.renderer.labels.template.verticalCenter = "middle";
+    categoryAxis.title.text = "CAD APPLICATION";
+    categoryAxis.title.rotation = 0;
+    categoryAxis.title.align = "center";
+    categoryAxis.title.valign = "top";
+    categoryAxis.renderer.minGridDistance = 50;
+
+    var valueAxis = chart7.yAxes.push(new am4charts.ValueAxis());
+    valueAxis.title.text = "UTILIZATION (COUNT)";
+    valueAxis.min = 0;
+    // Create series
+    var series = chart7.series.push(new am4charts.ColumnSeries());
+    series.dataFields.valueY = "value";
+    series.dataFields.categoryX = "title";
+    series.name = "value";
+    series.columns.template.tooltipText = "{categoryX}: [bold]{valueY}[/]";
+    series.columns.template.fillOpacity = .8;
+    series.columns.template.adapter.add("fill", function (fill, target) {
+        return chart7.colors.getIndex(target.dataItem.index);
+    })
+    series.columns.template.column.cornerRadiusTopLeft = 10;
+    series.columns.template.column.cornerRadiusTopRight = 10;
+
+    var labelBullet = new am4charts.LabelBullet();
+    series.bullets.push(labelBullet);
+    labelBullet.label.text = "{valueY.value.formatNumber('#.')}";
+    labelBullet.strokeOpacity = 0;
+    labelBullet.stroke = am4core.color("#dadada");
+    labelBullet.dy = 05;
+
+    var columnTemplate = series.columns.template;
+    columnTemplate.strokeWidth = 0;
+    columnTemplate.strokeOpacity = 1;
+
+    $.ajax({
+        type: "GET",
+        url: "/charts/KBEApplications",
+        contentType: "application/json; charset=utf-8",
+        dataType: "json",
+        success: successFunc3,
+        error: errorFunc
+    });
+
+    function successFunc3(data, status) {
+        chart7.data = data;
+        return false;
+    }
+
+    function errorFunc() {
+        alert('error');
+    }
+
+
+    filterApputilization = function (event) {
+
+        event.preventDefault();
+        var PC = $('#AUM_ProductCatagory :selected').text();
+        var Region = $('#AUM_Region :selected').text();
+        var CAD = $('#AUM_CAD :selected').text();
+       
+        var formdata = (new FormData($(this)[0]));
+        //var formdata = {PC:PC,Region:Region,CAD:CAD}
+        $.ajax({
+            url: '/charts/KBEApplicationsFilter',
+            type: 'POST',
+            data: formdata,
+            processData: false,
+            contentType: false,
+            success: function (result) {
+                chart7.data = result;
+            },
+            error: function (XMLHttpRequest, textStatus, errorThrown) {
+                console.log(textStatus);
+            }
+        });
+
+        return false;
+    }
+    $('#filterApputilization').submit(filterApputilization);
+
+    $('#btnunun').on('click', function (event) {
+        event.preventDefault(); 
+        
+            chart7.data =
+            [{ title: "CATIA", value: 225 }, { title: "NX", value: 174 },
+            { title: "SOLIDWORKS", value: 0 }]
+});
+
+</script>
+
+
+
+
+
+
+<style>
+    #chartdiv5 {
+        width: 100%;
+        height: 500px;
+        margin-right: 45px;
+        margin-left: -20px;
+    }
+</style>
+<style>
+
+    #dropdownMenuButtonCADApplicationsExport {
+        width: 95%;
+    }
+</style>
+<style>
+    #chartdiv6 {
+        width: 100%;
+        height: 500px;
+        margin-right: 45px;
+        margin-left: -20px;
+    }
+</style>
+
+<style>
+    #chartdiv7 {
+        width: 100%;
+        height: 550px;
+        margin-right: 45px;
+        margin-left: -20px;
+    }
+</style>
+
+<style>
+
+    .btn {
+        background-color: #f4511e;
+        border: none;
+        color: white;
+        padding: 10px 20px;
+        text-align: center;
+        font-size: 16px;
+        margin: 4px 2px;
+        opacity: 0.6;
+        transition: 0.3s;
+        width: 100px;
+        border-radius: 15px;
+    }
+
+
+
+        .btn:hover {
+            opacity: 1
+        }
+</style>
+

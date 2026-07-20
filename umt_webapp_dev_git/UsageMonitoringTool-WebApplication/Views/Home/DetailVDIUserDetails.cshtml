@@ -1,0 +1,87 @@
+﻿@model UsageMonitoringTool_WebApplication.Models.VDIUserDetail
+
+@{
+    ViewBag.Title = "VDI User Detail";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+<div class="container-fluid">
+    <h2>Detail of the VDI user @Model.UserId</h2>
+
+    <div>
+        <hr />
+        <dl class="dl-horizontal">
+            <dt>
+                @Html.DisplayNameFor(model => model.UserId)
+            </dt>
+
+            <dd>
+                @Html.DisplayFor(model => model.UserId)
+            </dd>
+
+            <dt>
+                @Html.DisplayNameFor(model => model.Region)
+            </dt>
+
+            <dd>
+                @Html.DisplayFor(model => model.Region)
+            </dd>
+
+            <dt>
+                @Html.DisplayNameFor(model => model.Domain)
+            </dt>
+
+            <dd>
+                @Html.DisplayFor(model => model.Domain)
+            </dd>
+
+            <dt>
+                @Html.DisplayNameFor(model => model.CreatedDate)
+            </dt>
+
+            <dd>
+                @Html.DisplayFor(model => model.CreatedDate)
+            </dd>
+
+            <dt>
+                @Html.DisplayNameFor(model => model.CreatedBy)
+            </dt>
+
+            <dd>
+                @Html.DisplayFor(model => model.CreatedBy)
+            </dd>
+
+            <dt>
+                @Html.DisplayNameFor(model => model.ModifiedDate)
+            </dt>
+
+            <dd>
+                @Html.DisplayFor(model => model.ModifiedDate)
+            </dd>
+
+            <dt>
+                @Html.DisplayNameFor(model => model.ModifiedBy)
+            </dt>
+
+            <dd>
+                @Html.DisplayFor(model => model.ModifiedBy)
+            </dd>
+
+        </dl>
+    </div>
+    <p>
+        @Html.ActionLink("Edit", "EditVDIUserDetails", new { id = Model.SrNo }, new { @class = "actionlink" }) |
+        @Html.ActionLink("Back to List", "VDIUserDetails", null, new { @class = "actionlink" })
+    </p>
+</div>
+
+<script>
+
+    $(document).ready(function () {
+        var $j = jQuery.noConflict();
+        $j('#aboutnav').removeClass('active');
+        $j('#homenav').removeClass('active');
+        $j('#usernav').addClass('active');
+        $j('#domainnav').removeClass('active');
+    });
+
+</script>

@@ -1,0 +1,146 @@
+﻿@model IEnumerable<UsageMonitoringTool_WebApplication.Models.CooperAdmins>
+
+@{
+    ViewBag.Title = "Manage Admin";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+@if (TempData["AccessDenied"] != null)
+{
+    <script>
+        alert('@TempData["AccessDenied"]');
+    </script>
+}
+
+@if (TempData["Success"] != null)
+{
+    <script>alert('@TempData["Success"]');</script>
+}
+@if (TempData["Error"] != null)
+{
+    <script>alert('@TempData["Error"]');</script>
+}
+
+
+<div class="container-fluid">
+    @using (Html.BeginForm("AddNewAdmin", "Home", FormMethod.Post))
+    {
+        @Html.AntiForgeryToken()
+
+        <div class="input-group" style="max-width: 300px;">
+            @Html.TextBox(
+                "userId",
+                null,
+                new
+                {
+                    @class = "form-control",
+                    autocomplete="off",
+                    placeholder = "Enter User ID"
+                })
+
+            <div class="input-group-append">
+                <button class="btn btn-primary" type="submit">
+                    Add Admin
+                </button>
+            </div>
+        </div>
+    }
+    <h2>List of Admin's</h2>
+
+    <table class="table" id="userData">
+
+        <colgroup>
+            <col style="width:50%" />
+            <col style="width:50%" />
+        </colgroup>
+
+        <tr>
+            <th>
+                @Html.DisplayNameFor(model => model.UserId)
+            </th>
+            <th></th>
+        </tr>
+
+        @foreach (var item in Model)
+        {
+            <tr>
+                <td>
+                    @Html.DisplayFor(modelItem => item.UserId)
+                </td>
+                <td>
+                    @Html.ActionLink("Remove", "RemoveAdmin", new { id = item.SrNo }, new { @class = "Actionlink" })
+                </td>
+            </tr>
+        }
+
+    </table>
+</div>
+<script>
+
+    $(document).ready(function () {
+        var $j = jQuery.noConflict();
+        $j('#aboutnav').removeClass('active');
+        $j('#homenav').removeClass('active');
+        $j('#usernav').removeClass('active');
+        $j('#domainnav').removeClass('active');
+        $j('#manageadminnav').addClass('active');
+    });
+
+
+</script>
+<style>
+    .btnCreate {
+        background-color: cornflowerblue;
+        color: white;
+        border-radius: 10px;
+        width: 200px;
+        padding: 10px 20px;
+        text-align: center;
+        font-size: 15px;
+        font-family: Calibri;
+        margin: 4px 2px;
+        opacity: 1.0;
+        transition: 0.3s;
+        height: 40px;
+    }
+
+        .btnCreate:hover {
+            opacity: 1; /* Darker blue on hover */
+        }
+
+
+    .right-align {
+        text-align: right;
+    }
+
+
+
+    .tableButtons {
+        background-color: cornflowerblue;
+        color: white;
+        border-radius: 8px;
+        width: 100px;
+        padding: 10px 20px;
+        text-align: center;
+        font-size: 12px;
+        font-family: Calibri;
+        margin: 4px 2px;
+        opacity: 1.0;
+        transition: 0.3s;
+        height: 10px;
+    }
+
+    #userData {
+        width: auto;
+        display: inline-table;
+    }
+
+    .input-group .btn {
+        background-color: cornflowerblue;
+        color: white;
+        border-radius: 0 10px 10px 0;
+        font-family: Calibri;
+    }
+
+
+</style>

@@ -1,0 +1,332 @@
+﻿@model UsageMonitoringTool_WebApplication.Models.DomainDetails
+
+@{
+    ViewBag.Title = "Create Domain Details";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+@if (TempData["AccessDenied"] != null)
+{
+    <script>
+        alert('@TempData["AccessDenied"]');
+    </script>
+}
+
+@if (TempData["Success"] != null)
+{
+    <script>alert('@TempData["Success"]');</script>
+}
+@if (TempData["Error"] != null)
+{
+    <script>alert('@TempData["Error"]');</script>
+}
+<h2>Create Domain Details</h2>
+
+@using (Html.BeginForm())
+{
+    @Html.AntiForgeryToken()
+    <div class="form-horizontal">
+        <hr />
+        @Html.ValidationSummary(true, "", new { @class = "text-danger" })
+
+        <!-- REGION -->
+        <div class="form-group">
+            <label class="control-label col-md-2">Region</label>
+            <div class="col-md-10">
+                @Html.DropDownList(
+                    "Region",
+                    (IEnumerable<SelectListItem>)ViewBag.RegionList,
+                    "-- Select Region --",
+                    new { @class = "form-control", id = "RegionDropdown", style = "height:35px;" }
+                )
+                @Html.ValidationMessage("Region", "", new { @class = "text-danger" })
+                <input type="text"
+                       id="NewRegionText"
+                       name="NewRegion"
+                       class="form-control"
+                       placeholder="Enter new region"
+                       style="display:none;margin-top:5px;" />
+            </div>
+        </div>
+
+        <!-- DOMAIN -->
+        <div class="form-group">
+            <label class="control-label col-md-2">Domain</label>
+            <div class="col-md-10">
+                <select id="DomainDropdown"
+                        name="Domain"
+                        class="form-control"
+                        style="height:35px"
+                        disabled>
+                    <option value="">-- Select Domain --</option>
+                </select>
+                @Html.ValidationMessage("Domain", "", new { @class = "text-danger" })
+                <input type="text"
+                       id="NewDomainText"
+                       name="NewDomain"
+                       class="form-control"
+                       placeholder="Enter new domain"
+                       style="display:none;margin-top:5px;" />
+            </div>
+        </div>
+
+        <!-- USER ID -->
+        <div class="form-group">
+            @Html.LabelFor(model => model.UserId, new { @class = "control-label col-md-2" })
+            <div class="col-md-10">
+
+                @Html.TextBoxFor(model => model.UserId,
+                    new
+                    {
+                        @class = "form-control",
+                        id = "UserIdTextbox",
+                        @readonly = "readonly",
+                        autocomplete = "off",
+                        list = "UserIdList"
+                    })
+
+
+                <div id="userSuggestionBox"
+                     style="border:1px solid #ccc;
+            display:none;
+            position:absolute;
+            background:white;
+            z-index:9999;
+            max-height:180px;
+            overflow-y:auto;
+            width:94%;
+            cursor:pointer">
+                </div>
+
+
+
+                @Html.ValidationMessageFor(model => model.UserId, "", new { @class = "text-danger" })
+            </div>
+        </div>
+
+        <!-- SUBMIT -->
+
+        <div class="form-group">
+            <div class="col-md-offset-2 col-md-10">
+
+                <input type="submit"
+                       value="Create"
+                       class="btn btn-primary" />
+
+                @Html.ActionLink(
+                    "Back",
+                    "DomainDetails",
+                    null,
+                    new { @class = "btn btn-primary", style = "margin-left:10px;" }
+                )
+
+            </div>
+        </div>
+    </div>
+}
+
+
+
+<script>
+    $(document).ready(function () {
+        var $j = jQuery.noConflict();
+        $j('#aboutnav').removeClass('active');
+        $j('#homenav').removeClass('active');
+        $j('#usernav').removeClass('active');
+        $j('#domainnav').addClass('active');
+    });
+
+    $(document).ready(function () {
+
+        // REGION CHANGE
+        $('#RegionDropdown').change(function () {
+            const region = $(this).val();
+
+            $('#DomainDropdown').prop('disabled', true).empty()
+                .append('<option value="">-- Select Domain --</option>');
+            $('#NewDomainText').hide().val();
+            $('#NewRegionText').hide().val();
+
+            if (!region) return;
+
+            if (region === 'ADD_NEW') {
+                $('#NewRegionText').show();
+                $('#DomainDropdown').prop('disabled', false)
+                    .append('<option value="ADD_NEW">Add New</option>');
+                return;
+            }
+
+            // AJAX load domains
+            $.get('@Url.Action("GetDomainsByRegion")', { region: region }, function (data) {
+                $('#DomainDropdown').append('<option value="ADD_NEW">Add New</option>');
+                $.each(data, function (i, item) {
+                    $('#DomainDropdown').append(
+                        $('<option></option>').val(item.Value).html(item.Text)
+                    );
+                });
+
+                $('#DomainDropdown').prop('disabled', false);
+            });
+        });
+
+        // DOMAIN CHANGE
+        $('#DomainDropdown').change(function () {
+            const domain = $(this).val();
+            $('#UserIdTextbox').prop('readonly', true);
+            $('#NewDomainText').hide().val();
+
+            if (!domain) return;
+
+            if (domain === 'ADD_NEW') {
+                $('#NewDomainText').show();
+            }
+
+            $('#UserIdTextbox').prop('readonly', false);
+        });
+    });
+
+
+
+document.addEventListener("DOMContentLoaded", function () {
+
+    const input = document.getElementById("UserIdTextbox");
+    const box = document.getElementById("userSuggestionBox");
+
+    let selectedIndex = -1;
+    let suggestions = [];
+
+    /* -------- Utility Functions -------- */
+
+    function highlight(text, term) {
+        const regex = new RegExp("(" + term + ")", "ig");
+        return text.replace(regex, "<strong>$1</strong>");
+    }
+
+    function setActive(index) {
+        const items = box.children;
+        if (!items.length) return;
+
+        for (let i = 0; i < items.length; i++) {
+            items[i].style.background = "#fff";
+        }
+
+        items[index].style.background = "#e9ecef";
+        selectedIndex = index;
+    }
+
+    function selectUser(value) {
+        input.value = value;
+        box.style.display = "none";
+    }
+
+    function renderBox(term) {
+        box.innerHTML = "";
+        selectedIndex = -1;
+
+        /* ✅ CASE 1: No users found */
+        if (suggestions.length === 0) {
+            const div = document.createElement("div");
+            div.textContent = "User ID not found";
+            div.style.padding = "8px 10px";
+            div.style.color = "#6c757d";
+            div.style.fontStyle = "italic";
+            div.style.fontSize = "15px";
+            div.style.cursor = "default";
+
+            box.appendChild(div);
+
+            box.style.width = input.offsetWidth + "px";
+            box.style.display = "block";
+            return;
+        }
+
+        /* ✅ CASE 2: Users found */
+        suggestions.forEach((user, index) => {
+
+            const div = document.createElement("div");
+            div.innerHTML = highlight(user, term);
+            div.style.padding = "6px 10px";
+            div.style.cursor = "pointer";
+            div.style.whiteSpace = "nowrap";
+            div.style.fontSize = "15px";   // ✅ Increased font size
+
+            div.onmouseenter = function () {
+                setActive(index);
+            };
+
+            div.onclick = function () {
+                selectUser(user);
+            };
+
+            box.appendChild(div);
+        });
+
+        box.style.width = input.offsetWidth + "px";
+        box.style.display = "block";
+    }
+
+    /* -------- Input Event -------- */
+
+    input.addEventListener("input", function () {
+        const term = this.value.trim();
+
+        if (term.length < 2) {
+            box.style.display = "none";
+            return;
+        }
+
+        fetch('@Url.Action("GetUserIdSuggestions", "Home")?term=' + encodeURIComponent(term))
+            .then(r => r.json())
+            .then(data => {
+                suggestions = data;
+                renderBox(term);
+            });
+    });
+
+    /* -------- Keyboard Navigation -------- */
+
+    input.addEventListener("keydown", function (e) {
+
+        const items = box.children;
+        if (!items.length) return;
+
+        if (e.key === "ArrowDown") {
+            e.preventDefault();
+            selectedIndex = (selectedIndex + 1) % items.length;
+            setActive(selectedIndex);
+        }
+
+        if (e.key === "ArrowUp") {
+            e.preventDefault();
+            selectedIndex = (selectedIndex - 1 + items.length) % items.length;
+            setActive(selectedIndex);
+        }
+
+        if (e.key === "Enter" && selectedIndex >= 0) {
+            e.preventDefault();
+            selectUser(suggestions[selectedIndex]);
+        }
+
+        if (e.key === "Escape") {
+            box.style.display = "none";
+        }
+    });
+
+    /* -------- Close on Outside Click -------- */
+
+    document.addEventListener("click", function (e) {
+        if (!box.contains(e.target) && e.target !== input) {
+            box.style.display = "none";
+        }
+    });
+
+    /* -------- Keep width synced on resize -------- */
+
+    window.addEventListener("resize", function () {
+        box.style.width = input.offsetWidth + "px";
+    });
+
+});
+
+
+</script>
+

@@ -1,0 +1,1315 @@
+﻿
+@{
+    ViewBag.Title = "Home Page";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+
+<body>
+    @{
+        List<SelectListItem> listItems3 = new List<SelectListItem>();
+        listItems3.Add(new SelectListItem
+        {
+            Text = "CATIA",
+            Value = "CATIA"
+        });
+        listItems3.Add(new SelectListItem
+        {
+            Text = "NX",
+            Value = "NX"
+        });        
+
+        
+
+        List<SelectListItem> listItems1 = new List<SelectListItem>();
+        @*listItems1.Add(new SelectListItem
+        {
+            Text = "FBD",
+            Value = "FBD"
+        });
+        listItems1.Add(new SelectListItem
+        {
+            Text = "FTS",
+            Value = "FTS",
+
+        });*@
+    listItems1.Add(new SelectListItem
+    {
+        Text = "FLUIDS",
+        Value = "FLUIDS"
+    });
+    listItems1.Add(new SelectListItem
+    {
+        Text = "SEALING",
+        Value = "SEALING"
+    });
+    listItems1.Add(new SelectListItem
+    {
+        Text = "GENERAL",
+        Value = "GENERAL"
+    });
+    //listItems1.Add(new SelectListItem
+    //{
+    //    Text = "All",
+    //    Value = "All",
+    //    Selected = true
+    //});
+
+    List<SelectListItem> listItems2 = new List<SelectListItem>();
+    listItems2.Add(new SelectListItem
+    {
+        Text = "NA",
+        Value = "NA"
+    });
+    listItems2.Add(new SelectListItem
+    {
+        Text = "APAC",
+        Value = "ASIA",
+    });
+    listItems2.Add(new SelectListItem
+    {
+        Text = "EU",
+        Value = "EU"
+    });    
+
+
+    List<SelectListItem> listHardware = new List<SelectListItem>();
+    //listHardware.Add(new SelectListItem
+    //{
+    //    Text = "All",
+    //    Value = "All",
+    //    Selected = true
+    //});
+
+    listHardware.Add(new SelectListItem
+    {
+        Text = "VDI",
+        Value = "VDI"
+    });
+    listHardware.Add(new SelectListItem
+    {
+        Text = "Non-VDI",
+        Value = "Non-VDI"
+    });
+
+
+    List<SelectListItem> listDomain = new List<SelectListItem>();
+    //listDomain.Add(new SelectListItem
+    //{
+    //    Text = "All",
+    //    Value = "All",
+    //    Selected = true
+    //});
+    listDomain.Add(new SelectListItem
+    {
+        Text = "COOPER",
+        Value = "COOPER"
+    });
+    listDomain.Add(new SelectListItem
+    {
+        Text = "TATA",
+        Value = "TATA"
+    });
+    listDomain.Add(new SelectListItem
+    {
+        Text = "MERGON",
+        Value = "MERGON"
+    });
+    }
+    }
+
+
+    <!--<nav class="navbar navbar-expand-md navbar-light bg-light sticky-top">-->
+    <!--navbar navbar-expand-lg navbar-light bg-light     navbar navbar-expand-sm navbar-light bg-light-->
+
+
+    <div class="row" style="margin-top: 30px;">
+        <h2 style="margin-left:50px;font-family: 'Times New Roman', Times, serif; font-size:30px;">Monthly Utilization Over the Year </h2>
+    </div>
+
+    <div id="MUG_Filters" class="panel panel-default" style="font-size:12pt; margin:30px;z-index:0">
+        <div class="panel-heading"><b>Filters</b></div>
+        <div id="collapseImport" class="collapse in">
+            <div class="panel-body">
+                @using (Html.BeginForm(null, null, FormMethod.Post, new { id = "IndexdateTimeFilter", name = "IndexdateTimeFilter" }))
+                {
+                    <div class="row">
+                        <div class="col-lg-2 col-md-3" style="display:inline-grid">
+                            @Html.Label("From Date (mm/dd/yyyy)")
+                            @*<input style="font-size:12pt" type="date" name="fromDate" id="MUG_Datepick1" min="2018-01-01" class="ddlList" format="mm/dd/yyyy" value="2019-01-01">*@
+                            <p><input type="text" class="ddlList" id="MUG_Datepick1" name="fromDate"></p>
+
+                        </div>
+                        <div class="col-lg-2 col-md-3" style="display:inline-grid">
+                            @Html.Label("To Date (mm/dd/yyyy)")
+                            @*<input style="font-size:12pt" type="date" name="toDate" id="MUG_Datepick2" min="2018-01-01" class="ddlList" value="2019-01-01">*@
+                            <p><input type="text" class="ddlList" id="MUG_Datepick2" name="toDate"></p>
+                        </div>
+
+                    </div>
+
+                    <div class="row">
+                        <div class="col-lg-2 col-md-3" style="display:-webkit-box">
+                            <input class="btn" type="submit" id="GoButton3" name="CadUtilizationFilter" value="Go" />
+                        </div>
+                        <div class="col-lg-2 col-md-3" style="display:-webkit-box">
+                            <div class="btn-group" style="width:100px; margin-left:10px">
+                                <button type="button" class="btn  dropdown-toggle" id="dropdownMenuButtonCadUtilizationFilterExport" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                                    Export To
+                                </button>
+                                <div class="dropdown-menu" id="DropDownMenuCADApplicationExportMug">
+                                    <a class="dropdown-item" href="#" id="PDF-2">PDF</a>
+                                    <a class="dropdown-item" href="#" id="JPG-2">JPG</a>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                }
+            </div>
+        </div>
+    </div>
+    <div class="row" style="position:relative">
+        <b style="left:1175px;bottom:-35px; font-family: 'Calibri', Times, serif; font-size:15px;position:absolute">Sort by</b>
+        <select class="ddllistmuoy" id="muoyfilter" style="position:absolute">
+            <option>Jan to Dec</option>
+            <option>High to Low</option>
+            <option>Low to High</option>
+        </select>
+    </div>
+
+    <div class="row" style="width: 100%; margin:30px;">
+        <div class="col-lg-1">
+        </div>
+    </div>    
+
+    <div  class="row" margin:50px">
+        <div class="col-lg-1">
+        </div>
+        <div class="col-lg-10">
+            <div class="row" , style="width:100%; margin-top:-30px;">
+                <div id="chartdiv2" ,class="chartdiv2" , style="margin: 30px; ">
+                    @*<div id="loadingMessage_MUHome" class="loading-message" style="display: none;">Loading...</div>*@
+                    <div id="Loader_mum">
+                        <img src="~/Assets/CarLoader.gif" alt="Loading..." width="300" height="200" />
+                        <p>Loading...</p>
+                    </div>
+                </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-lg-1">
+        </div>    
+
+    <div class="row" style="margin-top: 80px;">
+        <h2 style="margin-left:50px;font-family: 'Times New Roman', Times, serif; font-size:30px;">Percentage Utilization Of KBE Application </h2>
+    </div>
+
+    <div id="PUG_Filters" class="panel panel-default" style="font-size:12pt; margin:30px;z-index:0">
+        <div class="panel-heading"><b>Filters</b></div>
+        <div id="collapseImport" class="collapse in">
+            <div class="panel-body">
+
+                @using (Html.BeginForm(null, null, FormMethod.Post, new { id = "PercentageUtilization", name = "PercentageUtilization" }))
+                {
+                    <div class="row" style="border:3px">
+                        @*// Added By Pragya*@
+                        <div class="col-lg-2 col-md-3 ">
+                            @Html.Label("Product Category")
+                            @Html.DropDownList("Pum_Pc", listItems1, new { id = "Pum_Pc" })
+                        </div>
+
+                        <div class="col-lg-2 col-md-3">
+                            @Html.Label("Region/Territory")
+                            @Html.DropDownList("Pum_Region", listItems2, new { id = "Pum_Region" })
+                        </div>
+
+                        <div class="col-lg-2 col-md-3">
+                            @Html.Label("CAD  Applications")
+                            @Html.DropDownList("Pum_CadApps", listItems3, new { id = "Pum_CadApps" })
+                        </div>
+
+                        <div class="col-lg-2 col-md-3">
+                            @Html.Label("From Date (mm/dd/yyyy)")
+                            @*<input style="font-size:12pt" type="date" name="fromDate" id="PUG_Datepick1" min="2018-01-01" class="ddlList" value="2019-01-01">*@
+                            <p><input type="text" class="ddlList" id="PUG_Datepick1" name="fromDate"></p>
+                        </div>
+
+                        <div class="col-lg-2 col-md-3">
+                            @Html.Label("To Date (mm/dd/yyyy)")
+                            @*<input style="font-size:12pt" type="date" name="toDate" id="PUG_Datepick2" min="2018-01-01" class="ddlList" value="2019-01-01">*@
+                            <p><input type="text" class="ddlList" id="PUG_Datepick2" name="toDate"></p>
+                        </div>
+                    </div>
+
+                    <div class="row">
+                        <div class="col-lg-2 col-md-3" style="display:-webkit-box">
+                            <input class="btn" type="submit" name="PercentageUtilization_submmit" value="Go" />
+                        </div>
+                        <div class="dropdown">
+                            <button type="button" class="btn  dropdown-toggle" id="dropdownMenuButtonCADApplicationsExport" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false" width="100%">
+                                Export To
+                            </button>
+                            <div class="dropdown-menu" id="DropDownMenuCADApplicationsExportPUG">
+                                <a class="dropdown-item" href="#" id="PDF-1">PDF</a>
+                                <a class="dropdown-item" href="#" id="JPG-1">JPG</a>
+                            </div>
+                        </div>
+
+
+                    </div>
+                }
+
+            </div>
+        </div>
+    </div>
+
+    <div class="row" , style="margin:30px">
+        <div class="col-lg-1 col-sm-1"></div>
+        <div class="col-lg-10 col-sm-10">
+
+            <div class="chartdiv" , id="chartdiv">
+                @*<div id="loadingMessage_PUHome" class="loading-message" style="display: none;">Loading...</div>*@
+                <div id="Loader_pum">
+                    <img src="~/Assets/CarLoader.gif" alt="Loading..." width="300" height="200" />
+                    <p>Loading...</p>
+                </div>
+            </div>
+
+        </div>
+        <div class="col-lg-1 col-sm-1"></div>
+    </div>
+</body>
+
+
+<script>
+
+    var chart;
+    var chart2;
+
+    
+    $(document).ready(function () {
+        //showLoadingMessage('chartContainer');
+        var today = new Date();
+        var strToday = (today.getMonth() + 1) + '/' + today.getDate() + '/' + today.getFullYear();
+        var $j = jQuery.noConflict();
+        $j('#homenav').addClass('active');
+        $j('#aboutnav').removeClass('active');
+        $j('#usernav').removeClass('active');
+        $j('#domainnav').removeClass('active');
+        $j("#PUG_Datepick1").datepicker({
+            maxDate: "+0m +0w",
+            showOn: "button",
+            buttonImage: "/Assets/calendar.gif",
+            buttonImageOnly: true,
+            onSelect: function () {
+                var from = $("#PUG_Datepick1").val();
+                var to = $("#PUG_Datepick2").val();
+                if (Date.parse(from) > Date.parse(to)) {
+                    alert("Invalid Date Range");
+                }
+            }
+        });
+        $j("#PUG_Datepick1").val("01/01/" + today.getFullYear());
+
+        $j("#PUG_Datepick2").datepicker({
+            maxDate: "+0m +0w",
+            showOn: "button",
+            buttonImage: "/Assets/calendar.gif",
+            buttonImageOnly: true,
+            onSelect: function () {
+                var from = $("#PUG_Datepick1").val();
+                var to = $("#PUG_Datepick2").val();
+                if (Date.parse(from) > Date.parse(to)) {
+                    alert("Invalid Date Range");
+                }
+            }
+        });
+        $j("#PUG_Datepick2").val(strToday);
+
+        $j("#MUG_Datepick2").datepicker({
+            maxDate: "+0m +0w",
+            showOn: "button",
+            buttonImage: "/Assets/calendar.gif",
+            buttonImageOnly: true,
+            onSelect: function () {
+                var from = $("#MUG_Datepick1").val();
+                var to = $("#MUG_Datepick2").val();
+                if (Date.parse(from) > Date.parse(to)) {
+                    alert("Invalid Date Range");
+                }
+            }
+        });
+        $j("#MUG_Datepick2").val(strToday);
+
+        $j("#MUG_Datepick1").datepicker({
+            maxDate: "+0m +0w",
+            showOn: "button",
+            buttonImage: "/Assets/calendar.gif",
+            buttonImageOnly: true,
+            onSelect: function () {
+                var from = $("#MUG_Datepick1").val();
+                var to = $("#MUG_Datepick2").val();
+                if (Date.parse(from) > Date.parse(to)) {
+                    alert("Invalid Date Range");
+                }
+            }
+        });
+        $j("#MUG_Datepick1").val("01/01/" + today.getFullYear());
+        
+        
+        $.ajax({
+            type: "GET",
+            url: "/charts/MonthlyUtilizationHome",
+            contentType: "application/json; charset=utf-8",
+            dataType: "json",
+            beforeSend: function () {                
+                $('#Loader_mum').show();
+            },
+            success: function (result) {
+                $('#Loader_mum').hide();
+                $('#chartdiv2').empty();
+                InitializeMonthlyutilizationChart(result);                
+            },
+            error: function (XMLHttpRequest, textStatus, errorThrown) {
+                console.log(textStatus);
+            }
+        });
+        //hideLoadingMessage('chartContainer');
+
+        // Append the graph to the chartdiv2 element
+        //var chartContainer = document.getElementById('chartContainer');
+        //chartContainer.appendChild(chart2.container);
+        $.ajax({
+            type: "GET",
+            url: "/charts/PercentageUtilization",
+            contentType: "application/json; charset=utf-8",
+            dataType: "json",
+            beforeSend: function () {
+                $('#Loader_pum').show();
+            },
+            success: function (result) {
+                $('#Loader_pum').hide();
+                $('#chartdiv').empty();
+               // $('#chartdiv').html = "";
+                InitializePercentageUtilizationChart(result);
+            },
+            error: function (XMLHttpRequest, textStatus, errorThrown) {
+                console.log(textStatus);
+            }
+        });
+
+    });
+
+    function InitializePercentageUtilizationChart(result) {
+
+        // Themes begin
+        am4core.useTheme(am4themes_animated);
+        am4core.useTheme(am4themes_kelly);
+        // Themes end
+
+        // Create chart instance
+        chart = am4core.create("chartdiv", am4charts.PieChart);
+        chart.exporting.menu = new am4core.ExportMenu();
+
+        chart.data = result;
+
+        // Set inner radius
+        chart.innerRadius = am4core.percent(50);
+        //chart.legend = new am4charts.Legend();
+        // Add and configure Series
+        var pieSeries = chart.series.push(new am4charts.PieSeries());
+        pieSeries.dataFields.value = "value";
+        pieSeries.dataFields.category = "title";
+        pieSeries.slices.template.stroke = am4core.color("#fff");
+        pieSeries.slices.template.strokeWidth = 2;
+        pieSeries.slices.template.strokeOpacity = 1;
+
+
+        // This creates initial animation
+        pieSeries.hiddenState.properties.opacity = 1;
+        pieSeries.hiddenState.properties.endAngle = -90;
+        pieSeries.hiddenState.properties.startAngle = -90;
+        pieSeries.labels.template.text = "{category}: {value.percent.formatNumber('#.0')}% ({actual})";
+        console.info(pieSeries.labels.template.text);
+    }
+
+    function InitializeMonthlyutilizationChart(result) {
+        //am4core.useTheme(am4themes_animated);
+        //am4core.useTheme(am4themes_kelly);
+        //// Themes end
+
+        //// Create chart instance
+        //chart2 = new am4core.create("chartdiv2", am4charts.XYChart);
+        //chart2.exporting.menu = new am4core.ExportMenu();
+
+        //chart2.data = result;
+        //// Create axes
+
+        //var categoryAxis = chart2.xAxes.push(new am4charts.CategoryAxis());
+        //categoryAxis.dataFields.category = "title";
+        //categoryAxis.renderer.grid.template.location = 0;
+        ////categoryAxis.renderer.minGridDistance = 30;
+        //categoryAxis.title.text = "MONTHLY UTILIZATION";
+        //categoryAxis.renderer.labels.template.rotation = 290;
+        //categoryAxis.title.rotation = 0;
+        //categoryAxis.title.align = "center";
+        //categoryAxis.title.valign = "top";
+        //categoryAxis.renderer.minGridDistance = 50;
+
+
+        //var valueAxis = chart2.yAxes.push(new am4charts.ValueAxis());
+        //valueAxis.title.text = "UTILIZATION (COUNT)";
+        //valueAxis.min = 0;
+        //// Create series
+        //var series = chart2.series.push(new am4charts.ColumnSeries());
+        //series.dataFields.valueY = "value";
+        //series.dataFields.categoryX = "title";
+        //series.name = "value";
+        //series.columns.template.tooltipText = "{categoryX}: [bold]{valueY}[/]";
+        //series.columns.template.fillOpacity = .8;
+        //series.columns.template.column.cornerRadiusTopLeft = 10;
+        //series.columns.template.column.cornerRadiusTopRight = 10;
+        //series.columns.template.maxWidth = 100;
+        //series.columns.template.adapter.add("fill", function (fill, target) {
+        //    return chart2.colors.getIndex(target.dataItem.index);
+        //})
+
+        //var labelBullet = new am4charts.LabelBullet();
+        //series.bullets.push(labelBullet);
+        //labelBullet.label.text = "{valueY.value.formatNumber('#.')}";
+        //labelBullet.strokeOpacity = 0;
+        //labelBullet.stroke = am4core.color("#dadada");
+        //labelBullet.dy = 05;
+
+        //var columnTemplate = series.columns.template;
+        //columnTemplate.strokeWidth = 0;
+        //columnTemplate.strokeOpacity = 1;
+        //showLoadingMessage('chartContainer');
+        let selector = document.getElementById("muoyfilter")
+        const selectedOption = selector.options[selector.selectedIndex].value;
+        if (selectedOption == "Jan to Dec") {
+            sortjan_to_dec_muoy(result);
+        } else if (selectedOption == "High to Low") {
+            sorthigh_to_low_muoy(result);
+        } else {
+            sortlow_to_high_muoy(result);
+        }
+        selector.addEventListener("change", () => {
+            switch (selector.value) {
+                case "Low to High":
+                    sortlow_to_high_muoy(result);
+                    break;
+                case "High to Low":
+                    sorthigh_to_low_muoy(result);
+                    break;
+                case "Jan to Dec":
+                    sortjan_to_dec_muoy(result);  
+                    //hideLoadingMessage('chartContainer');
+                    break;
+            }
+        });
+    }
+    function sortlow_to_high_muoy(result) {
+        am4core.useTheme(am4themes_animated);
+        am4core.useTheme(am4themes_kelly);
+        // Themes end
+
+        // Create chart instance
+        chart2 = new am4core.create("chartdiv2", am4charts.XYChart);
+        chart2.exporting.menu = new am4core.ExportMenu();
+
+        chart2.data = result;
+        // Create axes
+
+        var categoryAxis = chart2.xAxes.push(new am4charts.CategoryAxis());
+        categoryAxis.dataFields.category = "title";
+        categoryAxis.renderer.grid.template.location = 0;
+        //categoryAxis.renderer.minGridDistance = 30;
+        categoryAxis.title.text = "MONTHLY UTILIZATION";
+        categoryAxis.renderer.labels.template.rotation = 290;
+        categoryAxis.title.rotation = 0;
+        categoryAxis.title.align = "center";
+        categoryAxis.title.valign = "top";
+        categoryAxis.renderer.minGridDistance = 50;
+
+
+        var valueAxis = chart2.yAxes.push(new am4charts.ValueAxis());
+        valueAxis.title.text = "UTILIZATION (COUNT)";
+        valueAxis.min = 0;
+        // Create series
+        var series = chart2.series.push(new am4charts.ColumnSeries());
+        series.dataFields.valueY = "value";
+        series.dataFields.categoryX = "title";
+        series.name = "value";
+        series.columns.template.tooltipText = "{categoryX}: [bold]{valueY}[/]";
+        series.columns.template.fillOpacity = .8;
+        series.columns.template.column.cornerRadiusTopLeft = 10;
+        series.columns.template.column.cornerRadiusTopRight = 10;
+        series.columns.template.maxWidth = 100;
+        series.columns.template.adapter.add("fill", function (fill, target) {
+            return chart2.colors.getIndex(target.dataItem.index);
+        })
+
+        var labelBullet = new am4charts.LabelBullet();
+        series.bullets.push(labelBullet);
+        labelBullet.label.text = "{valueY.value.formatNumber('#.')}";
+        labelBullet.strokeOpacity = 0;
+        labelBullet.stroke = am4core.color("#dadada");
+        labelBullet.dy = 05;
+
+        var columnTemplate = series.columns.template;
+        columnTemplate.strokeWidth = 0;
+        columnTemplate.strokeOpacity = 1;
+        categoryAxis.sortBySeries = series;
+        categoryAxis.renderer.inversed = true;
+    }
+    function sorthigh_to_low_muoy(result) {
+        am4core.useTheme(am4themes_animated);
+        am4core.useTheme(am4themes_kelly);
+        // Themes end
+
+        // Create chart instance
+        chart2 = new am4core.create("chartdiv2", am4charts.XYChart);
+        chart2.exporting.menu = new am4core.ExportMenu();
+
+        chart2.data = result;
+        // Create axes
+
+        var categoryAxis = chart2.xAxes.push(new am4charts.CategoryAxis());
+        categoryAxis.dataFields.category = "title";
+        categoryAxis.renderer.grid.template.location = 0;
+        //categoryAxis.renderer.minGridDistance = 30;
+        categoryAxis.title.text = "MONTHLY UTILIZATION";
+        categoryAxis.renderer.labels.template.rotation = 290;
+        categoryAxis.title.rotation = 0;
+        categoryAxis.title.align = "center";
+        categoryAxis.title.valign = "top";
+        categoryAxis.renderer.minGridDistance = 50;
+
+
+        var valueAxis = chart2.yAxes.push(new am4charts.ValueAxis());
+        valueAxis.title.text = "UTILIZATION (COUNT)";
+        valueAxis.min = 0;
+        // Create series
+        var series = chart2.series.push(new am4charts.ColumnSeries());
+        series.dataFields.valueY = "value";
+        series.dataFields.categoryX = "title";
+        series.name = "value";
+        series.columns.template.tooltipText = "{categoryX}: [bold]{valueY}[/]";
+        series.columns.template.fillOpacity = .8;
+        series.columns.template.column.cornerRadiusTopLeft = 10;
+        series.columns.template.column.cornerRadiusTopRight = 10;
+        series.columns.template.maxWidth = 100;
+        series.columns.template.adapter.add("fill", function (fill, target) {
+            return chart2.colors.getIndex(target.dataItem.index);
+        })
+
+        var labelBullet = new am4charts.LabelBullet();
+        series.bullets.push(labelBullet);
+        labelBullet.label.text = "{valueY.value.formatNumber('#.')}";
+        labelBullet.strokeOpacity = 0;
+        labelBullet.stroke = am4core.color("#dadada");
+        labelBullet.dy = 05;
+
+        var columnTemplate = series.columns.template;
+        columnTemplate.strokeWidth = 0;
+        columnTemplate.strokeOpacity = 1;
+        categoryAxis.sortBySeries = series;        
+
+    }
+    function sortjan_to_dec_muoy(result) {
+        am4core.useTheme(am4themes_animated);
+        am4core.useTheme(am4themes_kelly);
+        // Themes end
+
+        // Create chart instance
+        chart2 = new am4core.create("chartdiv2", am4charts.XYChart);
+        chart2.exporting.menu = new am4core.ExportMenu();
+
+        chart2.data = result;
+        // Create axes
+
+        var categoryAxis = chart2.xAxes.push(new am4charts.CategoryAxis());
+        categoryAxis.dataFields.category = "title";
+        categoryAxis.renderer.grid.template.location = 0;
+        //categoryAxis.renderer.minGridDistance = 30;
+        categoryAxis.title.text = "MONTHLY UTILIZATION";
+        categoryAxis.renderer.labels.template.rotation = 290;
+        categoryAxis.title.rotation = 0;
+        categoryAxis.title.align = "center";
+        categoryAxis.title.valign = "top";
+        categoryAxis.renderer.minGridDistance = 50;
+
+
+        var valueAxis = chart2.yAxes.push(new am4charts.ValueAxis());
+        valueAxis.title.text = "UTILIZATION (COUNT)";
+        valueAxis.min = 0;
+        // Create series
+        var series = chart2.series.push(new am4charts.ColumnSeries());
+        series.dataFields.valueY = "value";
+        series.dataFields.categoryX = "title";
+        series.name = "value";
+        series.columns.template.tooltipText = "{categoryX}: [bold]{valueY}[/]";
+        series.columns.template.fillOpacity = .8;
+        series.columns.template.column.cornerRadiusTopLeft = 10;
+        series.columns.template.column.cornerRadiusTopRight = 10;
+        series.columns.template.maxWidth = 100;
+        series.columns.template.adapter.add("fill", function (fill, target) {
+            return chart2.colors.getIndex(target.dataItem.index);
+        })
+
+        var labelBullet = new am4charts.LabelBullet();
+        series.bullets.push(labelBullet);
+        labelBullet.label.text = "{valueY.value.formatNumber('#.')}";
+        labelBullet.strokeOpacity = 0;
+        labelBullet.stroke = am4core.color("#dadada");
+        labelBullet.dy = 05;
+
+        var columnTemplate = series.columns.template;
+        columnTemplate.strokeWidth = 0;
+        columnTemplate.strokeOpacity = 1;        
+    }
+
+    IndexdateTimeFilter = function (event) {
+
+        event.preventDefault();
+        var formdata = (new FormData($(this)[0]));
+        //var formdata = {PC:PC,Region:Region,CAD:CAD}
+        $.ajax({
+            url: '/charts/IndexMonthlyUtilizationFilter',
+            type: 'POST',
+            data: formdata,
+            processData: false,
+            contentType: false,
+            beforeSend: function () {
+                $('#chartdiv2').empty(); 
+                $('#loadingMessage_MUHome').show();
+            },
+            success: function (result) {
+                $('#loadingMessage_MUHome').hide();
+                //$('#chartdiv2').empty();            
+                //$('#chartdiv2').html = "";
+                InitializeMonthlyutilizationChart(result);
+            },
+            error: function (XMLHttpRequest, textStatus, errorThrown) {
+                console.log(textStatus);
+            }
+        });
+        return false;
+    }
+    $('#IndexdateTimeFilter').submit(IndexdateTimeFilter);
+
+    PercentageUtilization = function (event) {
+
+        event.preventDefault();
+        var formdata = (new FormData($(this)[0]));
+        //var formdata = {PC:PC,Region:Region,CAD:CAD}
+        
+        var pumRegionCBs = $('input[name="Pum_Region_Mul"]:checked');        
+        var pumPcCBs = $('input[name="Pum_Pc_Mul"]:checked');
+        var pumCadAppsCBs = $('input[name="Pum_CadApps_Mul"]:checked');        
+        
+        // Create an array of their values
+        
+        var pumRegionvalues = pumRegionCBs.map(function () {
+            return $(this).val();
+        }).get();       
+        var pumPcvalues = pumPcCBs.map(function () {
+            return $(this).val();
+        }).get();
+        var pumCadAppsValues = pumCadAppsCBs.map(function () {
+            return $(this).val();
+        }).get();
+        
+        if (pumCadAppsCBs.length <= 0) {
+            alert("Please select atleast one cad application from the cad application dropdown menu");
+            return;
+            //msgString = `${msgString} ${"CadApplication"}`;
+        }
+        if (pumPcCBs.length <= 0) {
+            alert("Please select atleast one product category from the product category dropdown menu");
+            return;
+            //msgString = `${msgString} ${"ProductCategory"}`;
+        }        
+        if (pumRegionCBs.length <= 0) {
+            alert("Please select atleast one region from the region dropdown menu");
+            return;
+            //msgString = `${msgString} ${"Region"}`;
+        }   
+
+        //var values1 = checkboxes1.map(function () {
+        //    return $(this).val();
+        //}).get();
+        
+        formdata.append("PumRegion", pumRegionvalues);       
+        formdata.append("PumPc", pumPcvalues);
+        formdata.append("PumCadApps", pumCadAppsValues);
+        
+
+        $.ajax({
+            url: '/charts/PercentageUtilizationFilter',
+            type: 'POST',
+            data: formdata,
+            processData: false,
+            contentType: false,
+            beforeSend: function () {
+                $('#loadingMessage_PUHome').show();
+            },
+            success: function (result) {
+                $('#loadingMessage_PUHome').hide();
+                $('#chartdiv').empty();            
+                //$('#chartdiv').html = "";
+                InitializePercentageUtilizationChart(result);
+            },
+            error: function (XMLHttpRequest, textStatus, errorThrown) {
+                console.log(textStatus);
+            }
+        });
+        return false;
+    }
+    $('#PercentageUtilization').submit(PercentageUtilization);
+
+    //var today = new Date();
+    //var dd = today.getDate();
+    //var mm = today.getMonth() + 1; //January is 0!
+    //var yyyy = today.getFullYear();
+    //if (dd < 10) {
+    //    dd = '0' + dd
+    //}
+    //if (mm < 10) {
+    //    mm = '0' + mm
+    //}
+
+    //today = yyyy + '-' + mm + '-' + dd;
+    //document.getElementById("MUG_Datepick1").setAttribute("max", today);
+    //document.getElementById("MUG_Datepick2").setAttribute("max", today);
+    //document.getElementById("PUG_Datepick1").setAttribute("max", today);
+    //document.getElementById("PUG_Datepick2").setAttribute("max", today);
+
+    //document.getElementById("MUG_Datepick1").setAttribute("value", "01-01-2019");
+    //document.getElementById("MUG_Datepick2").setAttribute("value", "01-01-2019");
+    //document.getElementById("PUG_Datepick1").setAttribute("value", "01-01-2019");
+    //document.getElementById("PUG_Datepick2").setAttribute("value", "01-01-2019");
+
+    //$('#MUG_Datepick2').change(function () {
+
+    //    var from = $("#MUG_Datepick1").val();
+    //    var to = $("#MUG_Datepick2").val();
+    //    if (Date.parse(from) > Date.parse(to)) {
+    //        alert("Invalid Date Range");
+    //    }
+    //    //console.log($('#MUG_Datepick1').val());
+    //});
+
+    //$('#MUG_Datepick1').change(function () {
+
+    //    var from = $("#MUG_Datepick1").val();
+    //    var to = $("#MUG_Datepick2").val();
+    //    if (Date.parse(from) > Date.parse(to)) {
+    //        alert("Invalid Date Range");
+    //    }
+    //    //console.log($('#MUG_Datepick1').val());
+    //});
+
+    //$('#PUG_Datepick1').change(function () {
+
+    //    var from = $("#PUG_Datepick1").val();
+    //    var to = $("#PUG_Datepick2").val();
+    //    if (Date.parse(from) > Date.parse(to)) {
+    //        alert("Invalid Date Range");
+    //    }
+    //    //console.log($('#MUG_Datepick1').val());
+    //});
+
+    //$('#PUG_Datepick2').change(function () {
+
+    //    var from = $("#PUG_Datepick1").val();
+    //    var to = $("#PUG_Datepick2").val();
+    //    if (Date.parse(from) > Date.parse(to)) {
+    //        alert("Invalid Date Range");
+    //    }
+    //    //console.log($('#MUG_Datepick1').val());
+    //});
+
+    $("#PDF-1").click(function (e) {
+        chart.exporting.export("pdf");
+    });
+
+    $("#JPG-1").click(function (e) {
+        chart.exporting.export("jpg");
+    });
+
+    $("#PDF-2").click(function (e) {
+        chart2.exporting.export("pdf");
+    });
+
+    $("#JPG-2").click(function (e) {
+        chart2.exporting.export("jpg");
+    });
+    //multiple selection checkbox added by ibrahim    
+    $(document).ready(function () {
+        $("#Pum_CadApps").CreateMultiCheckBox({ name: 'Pum_CadApps_Mul', width: '200px', defaultText: 'All', height: '250px' });
+    });
+    $(document).ready(function () {
+        $("#Pum_Region").CreateMultiCheckBox({ name: 'Pum_Region_Mul', width: '200px', defaultText: 'All', height: '250px' });
+    });   
+    $(document).ready(function () {
+        $("#Pum_Pc").CreateMultiCheckBox({ name: 'Pum_Pc_Mul', width: '200px', defaultText: 'All', height: '250px' });
+    });
+
+    $(document).ready(function () {
+        $(document).on("click", ".MultiCheckBox", function () {
+            var detail = $(this).next();
+            detail.show();
+        });
+
+
+
+        $(document).on("click", ".MultiCheckBoxDetailHeader input", function (e) {
+            e.stopPropagation();
+            var hc = $(this).prop("checked");
+            $(this).closest(".MultiCheckBoxDetail").find(".MultiCheckBoxDetailBody input").prop("checked", hc);
+            $(this).closest(".MultiCheckBoxDetail").next().UpdateSelect();
+
+            //custom added for filter applied
+            var thisParent = $(this).closest('.MultiCheckBoxDetail');
+            var val = (thisParent.find(".MultiCheckBoxDetailBody input:checked").length == thisParent.find(".MultiCheckBoxDetailBody input").length);
+            thisParent.find(".MultiCheckBoxDetailHeader input").prop("checked", val);
+            //aded for filter apply text
+            if (!val) {
+                var thisDropDownDiv = thisParent[0].parentElement;
+                var mcbElement = thisDropDownDiv.getElementsByClassName("MultiCheckBox");
+                let spanElement = mcbElement[0].firstElementChild;
+                var selectedInputs = thisParent.find(".MultiCheckBoxDetailBody input:checked").length;
+                mcbElement[0].textContent = 'Filter Applied (' + selectedInputs + ')';
+                mcbElement[0].appendChild(spanElement);
+            }
+            else {
+                var thisDropDownDiv = thisParent[0].parentElement;
+                var mcbElement = thisDropDownDiv.getElementsByClassName("MultiCheckBox");
+                let spanElement = mcbElement[0].firstElementChild;
+                mcbElement[0].textContent = 'All';
+                mcbElement[0].appendChild(spanElement);
+            }
+        });
+
+        $(document).on("click", ".MultiCheckBoxDetailHeader", function (e) {
+            var inp = $(this).find("input");
+            var chk = inp.prop("checked");
+            inp.prop("checked", !chk);
+            $(this).closest(".MultiCheckBoxDetail").find(".MultiCheckBoxDetailBody input").prop("checked", !chk);
+            $(this).closest(".MultiCheckBoxDetail").next().UpdateSelect();
+
+            //custom added for filter applied
+            var thisParent = $(this).closest('.MultiCheckBoxDetail');
+            var val = (thisParent.find(".MultiCheckBoxDetailBody input:checked").length == thisParent.find(".MultiCheckBoxDetailBody input").length);
+            thisParent.find(".MultiCheckBoxDetailHeader input").prop("checked", val);
+            //aded for filter apply text
+            if (!val) {
+                var thisDropDownDiv = thisParent[0].parentElement;
+                var mcbElement = thisDropDownDiv.getElementsByClassName("MultiCheckBox");
+                let spanElement = mcbElement[0].firstElementChild;
+                var selectedInputs = thisParent.find(".MultiCheckBoxDetailBody input:checked").length;
+                mcbElement[0].textContent = 'Filter Applied (' + selectedInputs + ')';
+                mcbElement[0].appendChild(spanElement);
+            }
+            else {
+
+                var thisDropDownDiv = thisParent[0].parentElement;
+                var mcbElement = thisDropDownDiv.getElementsByClassName("MultiCheckBox");
+                let spanElement = mcbElement[0].firstElementChild;
+                mcbElement[0].textContent = 'All';
+                mcbElement[0].appendChild(spanElement);
+            }
+        });
+
+        $(document).on("click", ".MultiCheckBoxDetail .cont input", function (e) {
+            e.stopPropagation();
+            $(this).closest(".MultiCheckBoxDetail").next().UpdateSelect();
+
+            var thisParent = $(this).closest('.MultiCheckBoxDetail');
+            var val = (thisParent.find(".MultiCheckBoxDetailBody input:checked").length == thisParent.find(".MultiCheckBoxDetailBody input").length);
+            thisParent.find(".MultiCheckBoxDetailHeader input").prop("checked", val);
+
+            //aded for filter apply text
+            if (!val) {
+                var thisDropDownDiv = thisParent[0].parentElement;
+                var mcbElement = thisDropDownDiv.getElementsByClassName("MultiCheckBox");
+                let spanElement = mcbElement[0].firstElementChild;
+                var selectedInputs = thisParent.find(".MultiCheckBoxDetailBody input:checked").length;
+                mcbElement[0].textContent = 'Filter Applied (' + selectedInputs + ')';
+                mcbElement[0].appendChild(spanElement);
+            }
+            else {
+                //alert("ALL Selected");
+                
+                    var thisDropDownDiv = thisParent[0].parentElement;
+                    var mcbElement = thisDropDownDiv.getElementsByClassName("MultiCheckBox");
+                    let spanElement = mcbElement[0].firstElementChild;
+                    mcbElement[0].textContent = 'All';
+                    mcbElement[0].appendChild(spanElement);
+                
+            }
+        });
+
+
+
+        $(document).on("click", ".MultiCheckBoxDetail .cont", function (e) {
+            var inp = $(this).find("input");
+            var chk = inp.prop("checked");
+            inp.prop("checked", !chk);
+
+            var multiCheckBoxDetail = $(this).closest(".MultiCheckBoxDetail");
+            var multiCheckBoxDetailBody = $(this).closest(".MultiCheckBoxDetailBody");
+            multiCheckBoxDetail.next().UpdateSelect();
+
+            var thisParent = $(this).closest('.MultiCheckBoxDetail');
+
+            var val = (thisParent.find(".MultiCheckBoxDetailBody input:checked").length == thisParent.find(".MultiCheckBoxDetailBody input").length);
+            thisParent.find(".MultiCheckBoxDetailHeader input").prop("checked", val);
+
+            //aded for filter apply text
+            if (!val) {
+                var thisDropDownDiv = thisParent[0].parentElement;
+                var mcbElement = thisDropDownDiv.getElementsByClassName("MultiCheckBox");
+                let spanElement = mcbElement[0].firstElementChild;
+                var selectedInputs = thisParent.find(".MultiCheckBoxDetailBody input:checked").length;
+                mcbElement[0].textContent = 'Filter Applied (' + selectedInputs + ')';
+                mcbElement[0].appendChild(spanElement);
+            }
+            else {
+                //alert("All Selected .cont");
+
+                var thisDropDownDiv = thisParent[0].parentElement;
+                var mcbElement = thisDropDownDiv.getElementsByClassName("MultiCheckBox");
+                let spanElement = mcbElement[0].firstElementChild;
+                mcbElement[0].textContent = 'All';
+                mcbElement[0].appendChild(spanElement);
+
+            }
+            
+        });
+
+        $(document).mouseup(function (e) {
+            var container = $(".MultiCheckBoxDetail");
+            if (!container.is(e.target) && container.has(e.target).length === 0) {
+                container.hide();
+            }
+        });
+    });
+
+
+    var defaultMultiCheckBoxOption = { name: 'thisMultiSelectCB', width: '220px', defaultText: 'Select Below', height: '200px' };
+
+    jQuery.fn.extend({
+        CreateMultiCheckBox: function (options) {
+
+            var localOption = {};
+            localOption.width = (options != null && options.width != null && options.width != undefined) ? options.width : defaultMultiCheckBoxOption.width;
+            localOption.defaultText = (options != null && options.defaultText != null && options.defaultText != undefined) ? options.defaultText : defaultMultiCheckBoxOption.defaultText;
+            localOption.height = (options != null && options.height != null && options.height != undefined) ? options.height : defaultMultiCheckBoxOption.height;
+
+            localOption.name = (options != null && options.name != null && options.name != undefined) ? options.name : defaultMultiCheckBoxOption.name;
+
+
+            this.hide();
+            this.attr("multiple", "multiple");
+            var divSel = $("<div class='MultiCheckBox'>" + localOption.defaultText + "<span class='k-icon k-i-arrow-60-down'><svg aria-hidden='true' focusable='false' data-prefix='fas' data-icon='sort-down' role='img' xmlns='http://www.w3.org/2000/svg' viewBox='0 0 320 512' class='svg-inline--fa fa-sort-down fa-w-10 fa-2x'><path fill='currentColor' d='M41 288h238c21.4 0 32.1 25.9 17 41L177 448c-9.4 9.4-24.6 9.4-33.9 0L24 329c-15.1-15.1-4.4-41 17-41z' class=''></path></svg></span></div>").insertBefore(this);
+            divSel.css({ "width": localOption.width });
+
+            var detail = $("<div class='MultiCheckBoxDetail'><div class='MultiCheckBoxDetailHeader'><input type='checkbox' name='" + localOption.name + "' class='mulinput' value='ALL' checked='true' /><div>All</div></div><div class='MultiCheckBoxDetailBody'></div></div>").insertAfter(divSel);
+            detail.css({ "width": parseInt(options.width) + 10, "max-height": localOption.height });
+            var multiCheckBoxDetailBody = detail.find(".MultiCheckBoxDetailBody");
+
+            this.find("option").each(function () {
+                var val = $(this).attr("value");
+
+                if (val == undefined)
+                    val = '';
+
+                multiCheckBoxDetailBody.append("<div class='cont'><div><input type='checkbox' name='" + localOption.name + "' class='mulinput' value='" + val + "'checked='true'  /></div><div>" + $(this).text() + "</div></div>");
+            });
+
+            multiCheckBoxDetailBody.css("max-height", (parseInt($(".MultiCheckBoxDetail").css("max-height")) - 28) + "px");
+        },
+        UpdateSelect: function () {
+            var arr = [];
+
+            this.prev().find(".mulinput:checked").each(function () {
+                arr.push($(this).val());
+            });
+
+            this.val(arr);
+        },
+    });
+
+</script>
+
+
+
+<style>
+    .loading-message {
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+        font-size: 25px; /* Adjust the font size as needed */
+        color:cornflowerblue;
+        
+    }
+    #Loader_mum {
+        text-align: center;
+        margin-top: 200px;
+    }
+
+        #Loader_mum img {
+            margin: 0 auto;
+            display: block;
+        }
+
+        #Loader_mum p {
+            color: deepskyblue;
+            font-size: 24px;
+            font-weight: bold;
+            margin-top: 20px; /* Adjust the value to set the space between image and text */
+            margin-left: 20px;
+        }
+
+    #Loader_pum {
+        text-align: center;
+        margin-top: 200px;
+    }
+
+        #Loader_pum img {
+            margin: 0 auto;
+            display: block;
+        }
+
+        #Loader_pum p {
+            color: deepskyblue;
+            font-size: 24px;
+            font-weight: bold;
+            margin-top: 20px; /* Adjust the value to set the space between image and text */
+            margin-left: 20px;
+        }
+    #chartdiv2 {
+        width: 100%;
+        height: 500px;
+        margin-right: 45px;
+        margin-left: -20px;
+    }
+
+    #chartdiv {
+        width: 100%;
+        height: 500px;
+        margin-right: 45px;
+        margin-left: -20px;
+    }
+
+
+    /*#chartwrapper {
+        position: relative;
+        width: 80%;
+        height: 400px;
+        background: #fff;
+        -webkit-box-sizing: border-box;
+        -moz-box-sizing: border-box;
+        box-sizing: border-box;
+    }*/
+
+    /*#chartdiv {
+        position: absolute;
+        top: -30px;
+        left: -30px;
+        width: 260px;
+        height: 260px;
+        /*border: 1px dotted #0c0;*/
+        -webkit-box-sizing: border-box;
+        -moz-box-sizing: border-box;
+        box-sizing: border-box;
+    }*/
+
+    #PDF-1 {
+        width: 100%;
+        font-size: 18px;
+    }
+
+    /*#RegionID {
+        white-space: pre-wrap;
+    }*/
+
+    #JPG-1 {
+        width: 100%;
+        font-size: 18px;
+    }
+
+    #PDF-2 {
+        width: 100%;
+        font-size: 18px;
+    }
+
+    #JPG-2 {
+        width: 100%;
+        font-size: 18px;
+    }
+
+    Label {
+        font-family: Calibri;
+        font-size: 15px;
+    }
+
+    #dropdownMenuButtonCadUtilizationFilterExport {
+        margin-left: 30px;
+    }
+
+    #dropdownMenuButtonCADApplicationsExport {
+        margin-left: 17px;
+    }
+
+    #GoButton3 {
+        margin-left: 37px;
+    }
+
+    .btn {
+        background-color: #f4511e;
+        border: none;
+        color: white;
+        padding: 10px 20px;
+        text-align: center;
+        font-family: Calibri;
+        font-size: 15px;
+        margin: 4px 2px;
+        opacity: 0.6;
+        transition: 0.3s;
+        border-radius: 10px;
+    }
+
+        .btn:hover {
+            opacity: 1;
+        }
+
+    .ddlList {
+        background-color: cornflowerblue;
+        color: white;
+        border-radius: 10px;
+        width: 200px;
+        padding: 10px 20px;
+        text-align: center;
+        font-size: 15px;
+        font-family: Calibri;
+        margin: 4px 2px;
+        opacity: 2.0;
+        transition: 0.3s;
+        height: 40px;
+    }
+    .ddllistmuoy {
+        background-color: cornflowerblue;
+        color: white;
+        border-radius: 10px;
+        width: 100px;
+        /*padding: 10px 20px;*/
+        text-align: left;
+        font-size: 15px;
+        font-family: Calibri;
+        margin: 4px 2px;
+        opacity: 2.0;
+        transition: 0.3s;
+        height: 40px;
+        position: absolute;
+        left: 1225px;
+    }
+
+        .ddlList:hover {
+            opacity: 1;
+        }
+    .MultiCheckBox {
+        /*border: 1px solid #e2e2e2;
+        padding: 5px;
+        border-radius: 4px;
+        cursor: pointer;*/
+        background-color: cornflowerblue;
+        color: white;
+        border-radius: 10px;
+        width: 100px;
+        padding: 10px 20px;
+        text-align: center;
+        font-size: 15px;
+        font-family: Calibri;
+        margin: 4px 2px;
+        opacity: 1.0;
+        transition: 0.3s;
+        height: 40px;
+    }
+
+        .MultiCheckBox .k-icon {
+            font-size: 15px;
+            float: right;
+            font-weight: lighter;
+            margin-top: -7px;
+            height: 10px;
+            width: 14px;
+            color: white;
+        }
+
+    .MultiCheckBoxDetail {
+        display: none;
+        position: absolute;
+        border: 1px solid #e2e2e2;
+        overflow-y: hidden;
+        opacity:2.0;
+        z-index:1;
+    }
+
+    .MultiCheckBoxDetailBody {
+        overflow-y: auto;
+        background-color: cornflowerblue;
+        opacity: 2.0;
+    }
+
+    .MultiCheckBoxDetail .cont {
+        clear: both;
+        overflow: hidden;
+        padding: 2px;
+        color: white;
+        font-family: Calibri;
+        opacity: 2.0;
+    }
+
+        .MultiCheckBoxDetail .cont:hover {
+            background-color: dimgrey;
+        }
+
+    .MultiCheckBoxDetailBody > div > div {
+        float: left;
+    }
+
+    .MultiCheckBoxDetail > div > div:nth-child(1) {
+    }
+
+    .MultiCheckBoxDetailHeader {
+        overflow: hidden;
+        position: relative;
+        height: 28px;
+        background-color: cornflowerblue;
+        opacity:2.0;
+    }
+
+        .MultiCheckBoxDetailHeader > input {
+            position: absolute;
+            top: 4px;
+            left: 3px;
+        }
+
+        .MultiCheckBoxDetailHeader > div {
+            position: absolute;
+            top: 5px;
+            left: 24px;
+            color: #fff;
+        }
+
+        .MultiCheckBoxDetailHeader:hover {
+            background-color: dimgrey;
+        }
+</style>
+

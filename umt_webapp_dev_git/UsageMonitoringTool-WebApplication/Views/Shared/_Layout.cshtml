@@ -1,0 +1,176 @@
+﻿<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>UsageMonitoringTool - @ViewBag.Title</title>
+    @Styles.Render("~/Content/css")
+    @Scripts.Render("~/bundles/modernizr")
+
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css" integrity="sha384-Gn5384xqQ1aoWXA+058RXPxPg6fy4IWvTNh0E263XmFcJlSAwiGgFAW/dAiS6JXm" crossorigin="anonymous" />
+
+    @*< !--Charts-->*@
+    <style>
+        /*.navbar-nav .nav-item.active > a {
+            background-color: #808080;
+        }*/
+    </style>
+    <script src="https://www.amcharts.com/lib/4/core.js"></script>
+    <script src="https://www.amcharts.com/lib/4/charts.js"></script>
+    <script src="https://www.amcharts.com/lib/4/themes/dark.js"></script>
+    <script src="https://www.amcharts.com/lib/4/themes/kelly.js"></script>
+    <script src="https://www.amcharts.com/lib/4/themes/animated.js"></script>
+    <script src="https://www.amcharts.com/lib/4/themes/material.js"></script>
+    <script src="https://www.amcharts.com/lib/4/lang/de_DE.js"></script>
+    <script src="https://www.amcharts.com/lib/4/geodata/germanyLow.js"></script>
+
+</head>
+<body style="font-size: 12px; margin-top:-75px; ">
+    <div>
+        <div class="row" style="margin:20px">
+            <a class="navbar-brand" href="#" style="margin-bottom:30px;">
+                <img src="~/Assets/image.PNG" />
+            </a>
+
+            <p class="text-danger">
+                <h1 class="display-4" style="font-family: 'Times New Roman', Times, serif; font-size:48px; margin-top :20px; margin-left:350px;">
+                    <strong>KBE Usage Monitoring Tool</strong>
+                </h1>
+            </p>
+
+        </div>
+
+        <div class="row">
+            <div class="w-100">
+                <nav class="navbar navbar-expand-sm navbar-dark bg-dark">
+
+                    <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
+                        <span class="navbar-toggler-icon"></span>
+                    </button>
+
+                    <div class="collapse navbar-collapse" id="navbarSupportedContent">
+                        <ul class="navbar-nav mr-auto">
+                            @*<li class="nav-item active" id="homenav">
+            <span class="glyphicon glyphicon-home" style="color: white; top:16px;"></span>
+            <a class="nav-link" href="/Home" style="font-family: 'Times New Roman', Times, serif; font-size:22px; margin-left:20px;margin-top:-18px;">Home <span class="sr-only">(current)</span></a>
+        </li>*@
+
+                            <li class="nav-item" id="aboutnav">
+                                <span class="glyphicon glyphicon-list-alt" style="color: white; top:16px; margin-left:15px;"></span>
+                                <a class="nav-link" href="/Home/about" style="font-family: 'Times New Roman', Times, serif; font-size:22px; margin-left:30px;margin-top:-18px;">Reports</a>
+                            </li>
+                            @if (ViewBag.IsAdmin != null && ViewBag.IsAdmin)
+                            {
+                                <li class="nav-item" id="usernav">
+                                    <span class="glyphicon glyphicon-list-alt" style="color: white; top:16px; margin-left:15px;"></span>
+                                    <a class="nav-link" href="/Home/VDIUserDetails" style="font-family: 'Times New Roman', Times, serif; font-size:22px; margin-left:30px;margin-top:-18px;">VDI Users</a>
+                                </li>
+                                <li class="nav-item" id="domainnav">
+                                    <span class="glyphicon glyphicon-list-alt" style="color: white; top:16px; margin-left:15px;"></span>
+                                    <a class="nav-link" href="/Home/DomainDetails" style="font-family: 'Times New Roman', Times, serif; font-size:22px; margin-left:30px;margin-top:-18px;">Domain Details</a>
+                                </li>
+                                <li class="nav-item" id="manageadminnav">
+                                    <span class="glyphicon glyphicon-list-alt" style="color: white; top:16px; margin-left:15px;"></span>
+                                    <a class="nav-link" href="/Home/ManageAdmin" style="font-family: 'Times New Roman', Times, serif; font-size:22px; margin-left:30px;margin-top:-18px;">Manage Admin's</a>
+                                </li>
+                            }
+
+                            @*<li class="nav-item">
+            <a class="nav-link" href="#" style="font-family: 'Times New Roman', Times, serif; font-size:22px;">Contact Us</a>
+        </li>*@
+                        </ul>
+
+                        <div class="collapse navbar-collapse justify-content-end" id="navbarCollapse">
+
+                            <ul class="navbar-nav">
+                                <li>
+                                    <span class="glyphicon glyphicon-user" style="color: white; top:16px;"></span>
+                                </li>
+                                <li class="nav-item">
+
+                                    <a class="nav-link" href="#"
+                                       style="font-family: 'Times New Roman', Times, serif; font-size:18px;">
+
+                                        @if (ViewBag.IsAdmin != null && ViewBag.IsAdmin)
+                                        {
+                                            @("ADMIN\\" + User.Identity.Name.Split('\\').Last())
+                                        }
+                                        else
+                                        {
+                                            @User.Identity.Name
+                                        }
+
+                                    </a>
+                                </li>
+                                @*<li class="nav-item">
+                                        <a class="nav-link" href="#" style="font-family: 'Times New Roman', Times, serif; font-size:18px;">
+                                            @{
+                                                var adminUsers = new[] { "MYCORP\\IKK923470", "AUBURN\\IKATHAR", "AUBURN\\BGAY2", "AUBURN\\VBALAKRI", "AUBURN\\DPRATT" };
+                                            }
+                                            var userName = User.Identity.Name
+                                            @(adminUsers.Contains(User.Identity.Name.ToUpper()) ? $"ADMIN\\{userName}" : User.Identity.Name)
+                                        </a>
+                                    </li>*@
+                            </ul>
+                        </div>
+                    </div>
+
+                </nav>
+            </div>
+        </div>
+    </div>
+    @Scripts.Render("~/bundles/jquery")
+    @Scripts.Render("~/bundles/bootstrap")
+    @RenderSection("scripts", required: false)
+
+    @RenderBody()
+
+    <div style="bottom:0;position:fixed"><p> @@ @DateTime.Now.Year Powered by TATA TECHNOLOGIES </p></div>
+
+    <script src="~/Scripts/bootstrap.js"></script>
+    <script src="~/Scripts/bootstrap.min.js"></script>
+    <script src="~/Scripts/jquery-3.3.1.min.js"></script>
+    <link href="https://code.jquery.com/ui/1.12.1/themes/base/jquery-ui.css" rel="stylesheet" type="text/css" >
+    <script src="https://code.jquery.com/ui/1.12.1/jquery-ui.js"></script>
+    
+
+    <style>
+        .control-label {
+            font-size: 1.5em
+        }
+
+        .form-control {
+            font-size: 1.25em
+        }
+
+        .btn-primary {
+            font-size: 1.5em
+        }
+
+        .actionlink {
+            font-size: 1.25em
+        }
+
+        .table {
+            font-size: 1.25em
+        }
+
+        dd {
+            font-size: 1.25em
+        }
+
+        dt {
+            font-size: 1.25em
+        }
+        /*#preLoader {
+            background: #000 url(Assets/loader.gif) no-repeat center center;
+            background-size: 15%;
+            height: 100vh;
+            width: 100%;
+            position: fixed;
+            z-index: 100;
+        }*/
+    </style>
+</body>
+
+</html>

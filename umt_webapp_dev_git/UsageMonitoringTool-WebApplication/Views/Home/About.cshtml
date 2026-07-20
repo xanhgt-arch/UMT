@@ -1,0 +1,4093 @@
+﻿
+
+@{
+    ViewBag.Title = "Reports";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+<link href="https://cdnjs.cloudflare.com/ajax/libs/select2/4.0.3/css/select2.min.css" rel="stylesheet" />
+<script src="https://cdnjs.cloudflare.com/ajax/libs/select2/4.0.3/js/select2.min.js"></script>
+
+<div class="row" style="margin-top: 20px;">
+    <h2 style="margin-left:50px; font-family: 'Times New Roman', Times, serif; font-size:30px;">Utilization Over the Year </h2>
+</div>
+
+@{
+
+    List<SelectListItem> listItems3 = new List<SelectListItem>();
+    listItems3.Add(new SelectListItem
+    {
+        Text = "CATIA",
+        Value = "CATIA"
+    });
+    listItems3.Add(new SelectListItem
+    {
+        Text = "NX",
+        Value = "NX"
+    });
+
+    List<SelectListItem> listItems = ViewBag.listItems;
+    List<SelectListItem> listDomains = ViewBag.listitems2;
+    List<SelectListItem> listRegions = ViewBag.listitems3;
+    string xmlpath = "";
+    System.Xml.XmlDocument xmlfile = new System.Xml.XmlDocument();
+    string[] removeapps = { "CLIPS AND ADAPTORS", "HIT", "FLANGE THICKNESS", "TEST_APP" };
+    List<SelectListItem> Finalapps = new List<SelectListItem>();
+
+    string formattedStr2 = string.Empty;
+    string newname = string.Empty;
+    string newValue = string.Empty;
+
+    System.Xml.XmlElement nodesfrmConfig;
+    xmlpath = AppDomain.CurrentDomain.SetupInformation.ConfigurationFile;
+
+    if (System.IO.File.Exists(xmlpath))
+    {
+        xmlfile.Load(xmlpath);
+    }
+
+
+    foreach (var item in listItems)
+    {
+        bool existdata = false;
+        SelectListItem objSel = new SelectListItem();
+        if (item.Text.ToUpper() == "ALL")
+        {
+            continue;
+            //objSel.Selected = true;
+        }
+        if (removeapps.Contains(item.Text.ToUpper()))
+        {
+            continue;
+        }
+        formattedStr2 = item.Text.Replace(" ", "").Replace("_", "").ToUpper();
+        nodesfrmConfig = xmlfile.SelectSingleNode("/configuration/myCustomElement") as System.Xml.XmlElement;
+        System.Xml.XmlNodeList elemlst = nodesfrmConfig.GetElementsByTagName(formattedStr2);
+        if (elemlst != null && elemlst.Count > 0)
+        {
+            objSel.Text = elemlst.Item(0).InnerText;
+            objSel.Value = item.Value;
+        }
+        else
+        {
+            objSel.Text = item.Text;
+            objSel.Value = item.Value;
+        }
+
+        if (Finalapps.Count > 0)
+        {
+            int index = 0;
+            foreach (var x in Finalapps)
+            {
+                if (x.Text == objSel.Text)
+                {
+                    Finalapps[index].Value = Finalapps[index].Value + "," + objSel.Value;
+                    existdata = true;
+                    break;
+                }
+                index = index + 1;
+            }
+        }
+        if (existdata == false)
+        {
+            Finalapps.Add(objSel);
+        }
+
+    }
+    var Finalapps1 = Finalapps.OrderBy(x => x.Text).ToList();
+    List<SelectListItem> appDataList = new List<SelectListItem>();
+    appDataList.Add(new SelectListItem
+    {
+        Text = "SMART CVT",
+        Value = "SMART CVT"
+    });
+    appDataList.Add(new SelectListItem
+    {
+        Text = "POINT CHART",
+        Value = "POINT CHART"
+    });
+    appDataList.Add(new SelectListItem
+    {
+        Text = "PROFILE CHECKER",
+        Value = "PROFILE CHECKER"
+    });
+    appDataList.Add(new SelectListItem
+    {
+        Text = "FILE MANAGER",
+        Value = "FILE MANAGER"
+    });
+    appDataList.Add(new SelectListItem
+    {
+        Text = "MULTI 3D",
+        Value = "MULTI 3D"
+    });
+    appDataList.Add(new SelectListItem
+    {
+        Text = "SECTION MANAGER",
+        Value = "SECTION MANAGER"
+    });
+    appDataList.Add(new SelectListItem
+    {
+        Text = "3D TRIM",
+        Value = "3D TRIM"
+    });
+    List<SelectListItem> dataTypeList = new List<SelectListItem>();
+    dataTypeList.Add(new SelectListItem
+    {
+        Text = "PRODUCTION DATA",
+        Value = "PRODUCTION DATA"
+    });
+    dataTypeList.Add(new SelectListItem
+    {
+        Text = "TEST DATA",
+        Value = "TEST DATA"
+    });
+    List<SelectListItem> listItems1 = new List<SelectListItem>();
+    listItems1.Add(new SelectListItem
+    {
+        Text = "FLUIDS",
+        Value = "FLUIDS"
+    });
+    listItems1.Add(new SelectListItem
+    {
+        Text = "SEALING",
+        Value = "SEALING"
+    });
+    listItems1.Add(new SelectListItem
+    {
+        Text = "GENERAL",
+        Value = "GENERAL"
+    });
+
+    List<SelectListItem> listItems2 = listRegions.OrderBy(x => x.Text).ToList();
+    List<SelectListItem> listHardware = new List<SelectListItem>();
+
+    listHardware.Add(new SelectListItem
+    {
+        Text = "VDI",
+        Value = "VDI"
+    });
+    listHardware.Add(new SelectListItem
+    {
+        Text = "Non-VDI",
+        Value = "Non-VDI"
+    });
+
+    var listDomain = listDomains.OrderBy(x => x.Text).ToList();
+
+}
+
+
+<div id="panel" class="panel panel-default" style="font-size:12pt; margin:30px;z-index:0">
+    <div class="panel-heading"><b>Filters</b></div>
+    <div id="collapseImport" class="collapse in">
+        <div class="panel-body">
+            @using (Html.BeginForm(null, null, FormMethod.Post, new { id = "MonthlyUtiization", name = "MonthlyUtiization" }))
+            {
+                <div class="row">
+                    <div class="col-lg-2 col-md-3">
+                        @Html.Label("Application Name")
+                        @Html.DropDownList("MON_App", Finalapps1, new { id = "MON_App" })
+                    </div>
+
+                    <div class="col-lg-2 col-md-3">
+                        @Html.Label("Product Category")
+                        @Html.DropDownList("MON_PC", listItems1, new { id = "MON_Pc" })
+                    </div>
+
+                    <div class="col-lg-2 col-md-3">
+                        @Html.Label("Region/Territory")
+                        @Html.DropDownList("MON_Region", listItems2, new { id = "MON_Region" })
+                    </div>
+
+                    <div class="col-lg-2 col-md-2">
+                        @Html.Label("CAD Application")
+                        @Html.DropDownList("MON_CadApps", listItems3, new { id = "MON_CadApps" })
+                    </div>
+
+                    <div class="col-lg-2 col-md-3">
+                        @Html.Label("Domain")
+                        @Html.DropDownList("MON_Domain", listDomain, new { id = "MON_Domain" })
+                    </div>
+
+                    <div class="col-lg-2 col-md-3">
+                        @Html.Label("Hardware")
+                        @Html.DropDownList("Hardware", listHardware, new { id = "MON_Hardware" })
+                    </div>
+
+                    <div class="col-lg-2 col-md-3">
+                        @Html.Label("From Date (mm/dd/yyyy)")
+                        <p><input type="text" class="ddlList" id="MUG_Datepick1" name="fromDate"></p>
+                    </div>
+
+                    <div class="col-lg-2 col-md-3">
+                        @Html.Label("To Date (mm/dd/yyyy)")
+                        <p><input type="text" class="ddlList" id="MUG_Datepick2" name="toDate"></p>
+                    </div>
+
+                </div>
+
+                <div class="row">
+                    <div class="col-lg-2 col-md-1" style="display:-webkit-box">
+                        <input class="btn" type="submit" id="GoButton1" name="CadUtilizationFilter" value="Go" />
+                    </div>
+                    <div class="col-lg-2 col-md-1" style="display:-webkit-box">
+                        <div class="dropdown">
+                            <button type="button" class="btn dropdown-toggle" id="dropdownMenuButtonCadUtilizationFilterExport" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false" width="100%">
+                                Export To
+                            </button>
+
+                            <div class="dropdown-menu" id="DropDownMenu123">
+                                <a class="dropdown-item" href="#" id="PDF-5">PDF</a>
+                                <a class="dropdown-item" href="#" id="JPG-5">JPG</a>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-lg-2 col-md-1" style="display:-webkit-box">
+                        <input class="btn" type="button" name="DownloadAlldata" value="Download Data" id="downloadAllData" />
+                    </div>
+                </div>
+            }
+        </div>
+    </div>
+</div>
+<div class="row" style="position:relative">
+    <b style="left:1225px;bottom:-35px; font-family: 'Calibri', Times, serif; font-size:15px;position:absolute">Sort by</b>
+    <select class="ddllistaum" id="utoveryrfilter" style="position:absolute">
+        <option>Jan to Dec</option>
+        <option>High to Low</option>
+        <option>Low to High</option>
+    </select>
+</div>
+<div class="row" style="width: 100%; margin:30px;">
+    <div class="col-lg-1">
+    </div>
+</div>
+<div class="row" style="width: 100%; margin:30px">
+    <div class="col-lg-1">
+    </div>
+    <div class="col-lg-10">
+        <div id="chartdiv5" ,classs="chartdiv5">
+            <div id="Loader_uoy">
+                <img src="~/Assets/CarLoader.gif" alt="Loading..." width="300" height="200" />
+                <p>Loading...</p>
+            </div>
+        </div>
+
+    </div>
+    <div class="col-lg-1">
+    </div>
+</div>
+
+<div class="row" style="margin-top: 60px;">
+    <h2 style="margin-left:50px;font-family: 'Times New Roman', Times, serif; font-size:30px;">CAD Utilization Matrix </h2>
+</div>
+
+<div id="panel" class="panel panel-default" style="font-size:12pt; margin:30px;z-index:0">
+    <div class="panel-heading"><b>Filters</b></div>
+    <div id="collapseImport" class="collapse in">
+        <div class="panel-body">
+
+            @using (Html.BeginForm(null, null, FormMethod.Post, new { id = "filterCadutilization", name = "filterCadutilization" }))
+            {
+                <div class="row" style="border:3px">
+                    @*// Added By Pragya*@
+                    <div class="col-lg-2 col-md-3">
+                        @Html.Label("Application Name")
+                        @Html.DropDownList("Cum_App", Finalapps1, new { id = "Cum_App" })
+                    </div>
+
+                    <div class="col-lg-2 col-md-3 ">
+                        @Html.Label("Product Category")
+                        @Html.DropDownList("Cum_Pc", listItems1, new { id = "Cum_Pc" })
+                    </div>
+
+                    <div class="col-lg-2 col-md-3">
+                        @Html.Label("Region/Territory")
+                        @Html.DropDownList("Cum_Region", listItems2, new { id = "Cum_Region" })
+                    </div>
+
+                    <div class="col-lg-2 col-md-3">
+                        @Html.Label("Domain")
+                        @Html.DropDownList("Cum_Domain", listDomain, new { id = "Cum_Domain" })
+                    </div>
+
+                    <div class="col-lg-2 col-md-3">
+                        @Html.Label("Hardware")
+                        @Html.DropDownList("Cum_Hardware", listHardware, new { id = "Cum_Hardware" })
+                    </div>
+                </div>
+                <div class="row" style="border:3px">
+
+                    <div class="col-lg-2 col-md-3">
+                        @Html.Label("From Date (mm/dd/yyyy)")
+                        <p><input type="text" class="ddlList" id="CAD_Datepick1" name="fromDate"></p>
+                    </div>
+
+                    <div class="col-lg-2 col-md-3">
+                        @Html.Label("To Date (mm/dd/yyyy)")
+                        <p><input type="text" class="ddlList" id="CAD_Datepick2" name="toDate"></p>
+                    </div>
+                </div>
+
+                <div class="row">
+                    <div class="col-lg-2 col-md-3" style="display:-webkit-box">
+                        <input class="btn" id="GoButton2" type="submit" name="CadUtilizationFilter" value="Go" />
+
+                    </div>
+                    <div class="col-lg-2 col-md-3" style="display:-webkit-box">
+                        <div class="dropdown">
+                            <button type="button" class="btn dropdown-toggle" id="dropdownMenuButtonCADApplicationsExport" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false" width="100%">
+                                Export To
+                            </button>
+
+                            <div class="dropdown-menu" id="DropDownMenu123">
+                                <a class="dropdown-item" href="#" id="PDF-6">PDF</a>
+                                <a class="dropdown-item" href="#" id="JPG-6">JPG</a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            }
+
+        </div>
+    </div>
+</div>
+<div class="row" style="position:relative">
+    <b style="left:975px;bottom:-35px; font-family: 'Calibri', Times, serif; font-size:15px;position:absolute">Sort by</b>
+    <select class="ddllistcad" id="cadfilter" style="position:absolute">
+        <option>High to Low</option>
+        <option>Low to High</option>
+    </select>
+</div>
+<div class="row" style="width: 100%; margin:30px;">
+    <div class="col-lg-1">
+    </div>
+</div>
+<div class="row" style="width: 100%; margin:30px;">
+    <div class="col-lg-3"></div>
+    <div class="col-lg-6">
+        <div id="chartdiv6" , class="chartdiv6 ">
+            <div id="Loader_cum">
+                <img src="~/Assets/CarLoader.gif" alt="Loading..." width="300" height="200" />
+                <p>Loading...</p>
+            </div>
+        </div>
+    </div>
+    <div class="col-lg-3"></div>
+</div>
+
+<div class="row" style="width: 100%; margin-top:60px; font-family: 'Times New Roman', Times, serif; font-size:30px;">
+    <h2 style="margin-left:50px;font-family: 'Times New Roman', Times, serif; font-size:30px;">Application Utilization Matrix</h2>
+</div>
+
+<div id="panel" class="panel panel-default" style="font-size:12pt; margin:30px;z-index:0">
+    <div class="panel-heading"><b>Filters</b></div>
+    <div id="collapseImport" class="collapse in">
+        <div class="panel-body">
+
+            @using (Html.BeginForm(null, null, FormMethod.Post, new { id = "filterApputilization", name = "filterApputilization" }))
+            {
+                <div class="row">
+                    @*// Added By Pragya*@
+                    <div class="col-lg-2 col-md-3">
+                        @Html.Label("Application Name")
+                        @Html.DropDownList("AUM_App", Finalapps1, new { id = "AUM_App" })
+
+
+                    </div>
+                    <div class="col-lg-2 col-md-3">
+                        @Html.Label("Product Category")
+                        @Html.DropDownList("AUM_Pc", listItems1, new { id = "AUM_Pc" })
+
+
+                    </div>
+                    <div class="col-lg-2 col-md-3">
+                        @Html.Label("Region/Territory")
+                        @Html.DropDownList("AUM_Region", listItems2, new { id = "AUM_Region" })
+
+                    </div>
+
+                    <div class="col-lg-2 col-md-3">
+                        @Html.Label("CAD Application")
+                        @Html.DropDownList("AUM_CadApps", listItems3, new { id = "AUM_CadApps" })
+
+                    </div>
+
+                    <div class="col-lg-2 col-md-3">
+                        @Html.Label("Domain")
+                        @Html.DropDownList("AUM_Domain", listDomain, new { id = "AUM_Domain" })
+                    </div>
+
+                    <div class="col-lg-2 col-md-3">
+                        @Html.Label("Hardware")
+                        @Html.DropDownList("AUM_Hardware", listHardware, new { id = "AUM_Hardware" })
+
+                    </div>
+
+                    <div class="col-lg-2 col-md-3" style="display:inline-grid">
+                        @Html.Label("From Date (mm/dd/yyyy)")
+
+                        <p><input type="text" class="ddlList" id="KBEAPP_Datepick1" name="fromDate"></p>
+                    </div>
+
+                    <div class="col-lg-2 col-md-3" style="display:inline-grid">
+                        @Html.Label("To Date (mm/dd/yyyy)")
+
+                        <p><input type="text" class="ddlList" id="KBEAPP_Datepick2" name="toDate"></p>
+                    </div>
+
+                </div>
+
+                <div class="row">
+                    <div class="col-lg-2 col-md-3" style="display:-webkit-box">
+                        <input class="btn" type="submit" name="AppUtilizationFilter" value="Go" id="go_AUM" />
+                    </div>
+                    <div class="col-lg-2 col-md-3" style="display:-webkit-box">
+                        <div class="dropdown">
+                            <button type="button" class="btn dropdown-toggle" id="dropdownMenuButtonCADApplicationsExport" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false" width="100%">
+                                Export To
+                            </button>
+                            <div class="dropdown-menu" id="DropDownMenu123">
+                                <a class="dropdown-item" href="#" id="PDF-7">PDF</a>
+                                <a class="dropdown-item" href="#" id="JPG-7">JPG</a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+            }
+
+        </div>
+    </div>
+</div>
+<div class="row" style="position:relative">
+    <b style="left:1225px;bottom:-35px; font-family: 'Calibri', Times, serif; font-size:15px;position:absolute"> Sort by</b>
+    <select class="ddllistaum" id="kbefilter" style="position:absolute">
+        <option>A to Z</option>
+        <option>High to Low</option>
+        <option>Low to High</option>
+    </select>
+</div>
+<div class="row" style="width: 100%; margin:30px;">
+    <div class="col-lg-1">
+    </div>
+</div>
+<div class="row" style="width: 100%; margin:30px;">
+    <div class="col-lg-1">
+    </div>
+    <div class="col-lg-10">
+        <div id="chartdiv7" , class="chartdiv7">
+
+            <div id="Loader_aum">
+                <img src="~/Assets/CarLoader.gif" alt="Loading..." width="300" height="200" />
+                <p>Loading...</p>
+            </div>
+        </div>
+    </div>
+    <div class="col-lg-1">
+    </div>
+</div>
+@*Pecentage utilization matrix Begin*@
+<div class="row" style="margin-top: 80px;">
+    <h2 style="margin-left:50px;font-family: 'Times New Roman', Times, serif; font-size:30px;">Percentage Utilization Of KBE Application </h2>
+</div>
+
+<div id="PUG_Filters" class="panel panel-default" style="font-size:12pt; margin:30px;z-index:0">
+    <div class="panel-heading"><b>Filters</b></div>
+    <div id="collapseImport" class="collapse in">
+        <div class="panel-body">
+
+            @using (Html.BeginForm(null, null, FormMethod.Post, new { id = "PercentageUtilization", name = "PercentageUtilization" }))
+            {
+                <div class="row" style="border:3px">
+                    @*// Added By Pragya*@
+                    <div class="col-lg-2 col-md-3 ">
+                        @Html.Label("Product Category")
+                        @Html.DropDownList("Pum_Pc", listItems1, new { id = "Pum_Pc" })
+                    </div>
+
+                    <div class="col-lg-2 col-md-3">
+                        @Html.Label("Region/Territory")
+                        @Html.DropDownList("Pum_Region", listItems2, new { id = "Pum_Region" })
+                    </div>
+                    <div class="col-lg-2 col-md-3">
+                        @Html.Label("Domain")
+                        @Html.DropDownList("Pum_Domain", listDomain, new { id = "Pum_Domain" })
+                    </div>
+
+                    <div class="col-lg-2 col-md-3">
+                        @Html.Label("CAD  Applications")
+                        @Html.DropDownList("Pum_CadApps", listItems3, new { id = "Pum_CadApps" })
+                    </div>
+
+                    <div class="col-lg-2 col-md-3">
+                        @Html.Label("From Date (mm/dd/yyyy)")
+
+                        <p><input type="text" class="ddlList" id="PUG_Datepick1" name="fromDate"></p>
+                    </div>
+
+                    <div class="col-lg-2 col-md-3">
+                        @Html.Label("To Date (mm/dd/yyyy)")
+
+                        <p><input type="text" class="ddlList" id="PUG_Datepick2" name="toDate"></p>
+                    </div>
+                </div>
+
+                <div class="row">
+                    <div class="col-lg-2 col-md-3" style="display:-webkit-box">
+                        <input class="btn" type="submit" name="PercentageUtilization_submmit" value="Go" />
+                    </div>
+                    <div class="dropdown">
+                        <button type="button" class="btn  dropdown-toggle" id="dropdownMenuButtonCADApplicationsExport" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false" width="100%">
+                            Export To
+                        </button>
+                        <div class="dropdown-menu" id="DropDownMenuCADApplicationsExportPUG">
+                            <a class="dropdown-item" href="#" id="PDF-1">PDF</a>
+                            <a class="dropdown-item" href="#" id="JPG-1">JPG</a>
+                        </div>
+                    </div>
+
+
+                </div>
+            }
+
+        </div>
+    </div>
+</div>
+
+<div class="row" , style="margin:30px">
+    <div class="col-lg-1 col-sm-1"></div>
+    <div class="col-lg-10 col-sm-10">
+
+        <div class="chartdiv" , id="chartdiv">
+            <div id="Loader_pum">
+                <img src="~/Assets/CarLoader.gif" alt="Loading..." width="300" height="200" />
+                <p>Loading...</p>
+            </div>
+        </div>
+
+    </div>
+    <div class="col-lg-1 col-sm-1"></div>
+</div>
+@*Pecentage utilization matrix End*@
+
+<div class="row" style="width: 100%; margin-top:60px; font-family: 'Times New Roman', Times, serif; font-size:30px;">
+    <h2 style="margin-left:50px;font-family: 'Times New Roman', Times, serif; font-size:30px;">Application Data</h2>
+</div>
+<div id="panel" class="panel panel-default" style="font-size:12pt; margin:30px;z-index:0">
+    <div class="panel-heading"><b>Filters</b></div>
+    <div id="collapseImport" class="collapse in">
+        <div class="panel-body">
+
+            @using (Html.BeginForm(null, null, FormMethod.Post, new { id = "ApplicationData", name = "ApplicationData" }))
+            {
+                <div class="row">
+
+                    <div class="col-lg-2 col-md-3">
+                        @Html.Label("Application Name")
+                        @Html.DropDownList("AppData_App", appDataList, new { id = "AppData_App", @class = "ddlList" })
+
+                    </div>
+                    <div class="col-lg-2 col-md-3">
+                        @Html.Label("CAD Application")
+                        @Html.DropDownList("AppData_CadApps", listItems3, new { id = "AppData_CadApps" })
+
+                    </div>
+                    <div class="col-lg-2 col-md-3">
+                        @Html.Label("Data Category")
+                        @Html.DropDownList("AppData_DataCategory", dataTypeList, new { id = "AppData_DataCategory" })
+
+                    </div>
+                    <div class="col-lg-2 col-md-3">
+                        @Html.Label("From Date (mm/dd/yyyy)")
+                        <p><input type="text" class="ddlList" id="AppDataDatePick1" name="fromDate"></p>
+                    </div>
+
+                    <div class="col-lg-2 col-md-3">
+                        @Html.Label("To Date (mm/dd/yyyy)")
+                        <p><input type="text" class="ddlList" id="AppDataDatePick2" name="toDate"></p>
+                    </div>
+                </div>
+                <div class="row">
+
+                    <div class="col-lg-2 col-md-1" style="display:-webkit-box">
+                        <input class="btn" type="button" name="AppDownloadAlldata" value="Download Data" id="AppdownloadAllData" />
+                    </div>
+                </div>
+            }
+
+        </div>
+    </div>
+</div>
+<script src="../../Scripts/jquery-3.4.1.js"></script>
+<script src='../../Scripts/MultipleSelection.js'></script>
+<script src="https://code.jquery.com/jquery-3.4.1.js"></script>
+
+<script type="text/javascript" src="../../Scripts/jquery.multi-select.js"></script>
+<script type="text/javascript" src="../../Scripts/jquery.multi-select.min.js"></script>
+@*<script type="text/javascript" src="../../Scripts/jquery-2.2.4.min.js"></script>*@
+
+<link rel="stylesheet" type="text/css" href="../../Scripts/example-styles.css">
+<link rel="stylesheet" type="text/css" href="../../Scripts/demo-styles.css">
+<script>
+
+
+    // Themes begin
+    var chart5;
+    var chart6;
+    var chart7;
+
+    var selectElement = document.getElementsByClassName('MultiCheckBoxDetail');
+
+    for (var i = 0; i < selectElement.length; i++) {
+        alert(selectElement[i]);
+    }
+
+
+
+    $(document).ready(function () {
+        var today = new Date();
+        var strToday = (today.getMonth() + 1) + '/' + today.getDate() + '/' + today.getFullYear();
+        var $j = jQuery.noConflict();
+        $j('#aboutnav').addClass('active');
+        $j('#homenav').removeClass('active');
+        $j('#usernav').removeClass('active');
+        $j('#domainnav').removeClass('active');
+        $j('#manageadminnav').removeClass('active');
+        $j("#MUG_Datepick2").datepicker({
+            maxDate: "+0m +0w",
+            showOn: "button",
+            buttonImage: "/Assets/calendar.gif",
+            buttonImageOnly: true,
+            onSelect: function () {
+                var from = $("#MUG_Datepick1").val();
+                var to = $("#MUG_Datepick2").val();
+                if (Date.parse(from) > Date.parse(to)) {
+                    alert("Invalid Date Range");
+                }
+            }
+        });
+        $j("#MUG_Datepick2").val(strToday);
+
+        $j("#MUG_Datepick1").datepicker({
+            maxDate: "+0m +0w",
+            showOn: "button",
+            buttonImage: "/Assets/calendar.gif",
+            buttonImageOnly: true,
+            onSelect: function () {
+                var from = $("#MUG_Datepick1").val();
+                var to = $("#MUG_Datepick2").val();
+                if (Date.parse(from) > Date.parse(to)) {
+                    alert("Invalid Date Range");
+                }
+            }
+        });
+        $j("#MUG_Datepick1").val("01/01/" + today.getFullYear());
+
+        $j("#KBEAPP_Datepick1").datepicker({
+            maxDate: "+0m +0w",
+            showOn: "button",
+            buttonImage: "/Assets/calendar.gif",
+            buttonImageOnly: true,
+            onSelect: function () {
+                var from = $("#KBEAPP_Datepick1").val();
+                var to = $("#KBEAPP_Datepick2").val();
+                if (Date.parse(from) > Date.parse(to)) {
+                    alert("Invalid Date Range");
+                }
+            }
+        });
+        $j("#KBEAPP_Datepick1").val("01/01/" + today.getFullYear());
+
+        $j("#KBEAPP_Datepick2").datepicker({
+            maxDate: "+0m +0w",
+            showOn: "button",
+            buttonImage: "/Assets/calendar.gif",
+            buttonImageOnly: true,
+            onSelect: function () {
+                var from = $("#KBEAPP_Datepick1").val();
+                var to = $("#KBEAPP_Datepick2").val();
+                if (Date.parse(from) > Date.parse(to)) {
+                    alert("Invalid Date Range");
+                }
+            }
+        });
+
+        $j("#KBEAPP_Datepick2").val(strToday);
+
+        $j("#CAD_Datepick1").datepicker({
+            maxDate: "+0m +0w",
+            showOn: "button",
+            buttonImage: "/Assets/calendar.gif",
+            buttonImageOnly: true,
+            onSelect: function () {
+                var from = $("#CAD_Datepick1").val();
+                var to = $("#KBEAPP_Datepick2").val();
+                if (Date.parse(from) > Date.parse(to)) {
+                    alert("Invalid Date Range");
+                }
+            }
+        });
+
+        $j("#CAD_Datepick1").val("01/01/" + today.getFullYear());
+
+        $j("#CAD_Datepick2").datepicker({
+            maxDate: "+0m +0w",
+            showOn: "button",
+            buttonImage: "/Assets/calendar.gif",
+            buttonImageOnly: true,
+            onSelect: function () {
+                var from = $("#CAD_Datepick1").val();
+                var to = $("#CAD_Datepick2").val();
+                if (Date.parse(from) > Date.parse(to)) {
+                    alert("Invalid Date Range");
+                }
+            }
+        });
+
+
+        $j("#CAD_Datepick2").val(strToday);
+        @*Percentage utilization matrix begin*@
+        $j("#PUG_Datepick1").datepicker({
+            maxDate: "+0m +0w",
+            showOn: "button",
+            buttonImage: "/Assets/calendar.gif",
+            buttonImageOnly: true,
+            onSelect: function () {
+                var from = $("#PUG_Datepick1").val();
+                var to = $("#PUG_Datepick2").val();
+                if (Date.parse(from) > Date.parse(to)) {
+                    alert("Invalid Date Range");
+                }
+            }
+        });
+        $j("#PUG_Datepick1").val("01/01/" + today.getFullYear());
+
+        $j("#PUG_Datepick2").datepicker({
+            maxDate: "+0m +0w",
+            showOn: "button",
+            buttonImage: "/Assets/calendar.gif",
+            buttonImageOnly: true,
+            onSelect: function () {
+                var from = $("#PUG_Datepick1").val();
+                var to = $("#PUG_Datepick2").val();
+                if (Date.parse(from) > Date.parse(to)) {
+                    alert("Invalid Date Range");
+                }
+            }
+        });
+        $j("#PUG_Datepick2").val(strToday);
+        @* Percentage utilization matrix end *@
+        $j("#AppDataDatePick1").datepicker({
+            maxDate: "+0m +0w",
+            showOn: "button",
+            buttonImage: "/Assets/calendar.gif",
+            buttonImageOnly: true,
+            onSelect: function () {
+                var from = $("#AppDataDatePick1").val();
+                var to = $("#AppDataDatePick2").val();
+                if (Date.parse(from) > Date.parse(to)) {
+                    alert("Invalid Date Range");
+                }
+            }
+        });
+        $j("#AppDataDatePick1").val("01/01/" + today.getFullYear());
+
+        $j("#AppDataDatePick2").datepicker({
+            maxDate: "+0m +0w",
+            showOn: "button",
+            buttonImage: "/Assets/calendar.gif",
+            buttonImageOnly: true,
+            onSelect: function () {
+                var from = $("#AppDataDatePick1").val();
+                var to = $("#AppDataDatePick2").val();
+                if (Date.parse(from) > Date.parse(to)) {
+                    alert("Invalid Date Range");
+                }
+            }
+        });
+
+        $j("#AppDataDatePick2").val(strToday);
+
+        $(".ui-datepicker-trigger").css("margin-left", "3px");
+
+
+
+        //$("#datetimepicker1").datepicker();
+        $.ajax({
+            type: "GET",
+            url: "/charts/KBEApplications",
+            contentType: "application/json; charset=utf-8",
+            dataType: "json",
+            beforeSend: function () {
+                $('#Loader_aum').show();
+            },
+            success: function (result) {
+                $('#Loader_aum').hide();
+                $('#chartdiv7').empty();
+                //$('#chartdiv7').html = "";
+                InitializeKBEApplicationChart(result);
+            },
+            error: function (XMLHttpRequest, textStatus, errorThrown) {
+                console.log(textStatus);
+            }
+        });
+
+        $.ajax({
+            type: "GET",
+            url: "/charts/CADApplications",
+            contentType: "application/json; charset=utf-8",
+            dataType: "json",
+            beforeSend: function () {
+                $('#Loader_cum').show();
+            },
+            success: function (result) {
+                $('#Loader_cum').hide();
+                $('#chartdiv6').empty();
+                //$('#chartdiv6').html = "";
+                InitializeCADApplicationChart(result);
+            },
+            error: function (XMLHttpRequest, textStatus, errorThrown) {
+                console.log(textStatus);
+            }
+        });
+
+        $.ajax({
+            type: "GET",
+            url: "/charts/MonthlyUtilization",
+            contentType: "application/json; charset=utf-8",
+            dataType: "json",
+            beforeSend: function () {
+                $('#Loader_uoy').show();
+            },
+            success: function (result) {
+                $('#Loader_uoy').hide();
+                $('#chartdiv5').empty();
+                //$('#chartdiv5').html = "";
+                InitializeMonthlyUtilizationChart(result);
+            },
+            error: function (XMLHttpRequest, textStatus, errorThrown) {
+                console.log(textStatus);
+            }
+        });
+        @* Pecentage utilization matrix Begin *@
+        $.ajax({
+            type: "GET",
+            url: "/charts/PercentageUtilization",
+            contentType: "application/json; charset=utf-8",
+            dataType: "json",
+            beforeSend: function () {
+                $('#Loader_pum').show();
+            },
+            success: function (result) {
+                $('#Loader_pum').hide();
+                $('#chartdiv').empty();
+                // $('#chartdiv').html = "";
+                InitializePercentageUtilizationChart(result);
+            },
+            error: function (XMLHttpRequest, textStatus, errorThrown) {
+                console.log(textStatus);
+            }
+        });
+        @* Pecentage utilization matrix End *@
+    });
+
+    filterCadutilization = function (event) {
+
+        event.preventDefault();
+        var formdata = (new FormData($(this)[0]));
+        let msgString = ":";
+        var cumAppCBs = $('input[name="Cum_App_Mul"]:checked');
+        var cumRegionCBs = $('input[name="Cum_Region_Mul"]:checked');
+        var cumHardwareCBs = $('input[name="Cum_Hardware_Mul"]:checked');
+        var cumPcCBs = $('input[name="Cum_Pc_Mul"]:checked');
+        var cumDomainCBs = $('input[name="Cum_Domain_Mul"]:checked');
+
+        var cumAppValues = cumAppCBs.map(function () {
+            return $(this).val();
+        }).get();
+        var cumRegionValues = cumRegionCBs.map(function () {
+            return $(this).val();
+        }).get();
+        var cumHardwareValues = cumHardwareCBs.map(function () {
+            return $(this).val();
+        }).get();
+        var cumPcValues = cumPcCBs.map(function () {
+            return $(this).val();
+        }).get();
+        var cumDomainValues = cumDomainCBs.map(function () {
+            return $(this).val();
+        }).get();
+
+        if (cumAppCBs.length <= 0) {
+            alert("Please select atleast one application from the application name dropdown menu");
+            return;
+            msgString = `${msgString} ${"ApplicationName"}`;
+        }
+        if (cumPcCBs.length <= 0) {
+            alert("Please select atleast one product category from the product category dropdown menu");
+            return;
+            msgString = `${msgString} ${"ProductCategory"}`;
+        }
+        if (cumHardwareCBs.length <= 0) {
+            alert("Please select atleast one hardware from the hardware dropdown menu");
+            return;
+            msgString = `${msgString} ${"Hardware"}`;
+        }
+        if (cumDomainCBs.length <= 0) {
+            alert("Please select atleast one domain from the domain dropdown menu");
+            return;
+            msgString = `${msgString} ${"Domain"}`;
+        }
+        if (cumRegionCBs.length <= 0) {
+            alert("Please select atleast one region from the region dropdown menu");
+            return;
+            msgString = `${msgString} ${"Region"}`;
+        }
+
+        formdata.append("CumApps", cumAppValues);
+        formdata.append("CumRegion", cumRegionValues);
+        formdata.append("CumHardware", cumHardwareValues);
+        formdata.append("CumPc", cumPcValues);
+        formdata.append("CumDomain", cumDomainValues);
+
+
+        $.ajax({
+            url: '/charts/CADToolFilter',
+            type: 'POST',
+            data: formdata,
+            processData: false,
+            contentType: false,
+            success: function (result) {
+                $('#chartdiv6').html = "";
+                InitializeCADApplicationChart(result);
+            },
+            error: function (XMLHttpRequest, textStatus, errorThrown) {
+                console.log(textStatus);
+            }
+        });
+        return false;
+    }
+    $('#filterCadutilization').submit(filterCadutilization);
+
+    MonthlyUtiization = function (event) {
+
+        event.preventDefault();
+        var formdata = (new FormData($(this)[0]));
+        let msgString = ":";
+        var uoyAppCBs = $('input[name="Uoy_App_Mul"]:checked');
+        var uoyRegionCBs = $('input[name="Uoy_Region_Mul"]:checked');
+        var uoyHardwareCBs = $('input[name="Uoy_Hardware_Mul"]:checked');
+        var uoyPcCBs = $('input[name="Uoy_Pc_Mul"]:checked');
+        var uoyCadAppsCBs = $('input[name="Uoy_CadApps_Mul"]:checked');
+        var uoyDomainCBs = $('input[name="Uoy_Domain_Mul"]:checked');
+
+        var uoyAppValues = uoyAppCBs.map(function () {
+            return $(this).val();
+        }).get();
+        var uoyRegionValues = uoyRegionCBs.map(function () {
+            return $(this).val();
+        }).get();
+        var uoyHardwareValues = uoyHardwareCBs.map(function () {
+            return $(this).val();
+        }).get();
+        var uoyPcValues = uoyPcCBs.map(function () {
+            return $(this).val();
+        }).get();
+        var uoyCadAppsValues = uoyCadAppsCBs.map(function () {
+            return $(this).val();
+        }).get();
+        var uoyDomainValues = uoyDomainCBs.map(function () {
+            return $(this).val();
+        }).get();
+
+        if (uoyAppCBs.length <= 0) {
+            alert("Please select atleast one application from the application name dropdown menu");
+            return;
+            msgString = `${msgString} ${"ApplicationName"}`;
+        }
+        if (uoyCadAppsCBs.length <= 0) {
+            alert("Please select atleast one cad application from the cad application dropdown menu");
+            return;
+            msgString = `${msgString} ${"CadApplication"}`;
+        }
+        if (uoyPcCBs.length <= 0) {
+            alert("Please select atleast one product category from the product category dropdown menu");
+            return;
+            msgString = `${msgString} ${"ProductCategory"}`;
+        }
+        if (uoyHardwareCBs.length <= 0) {
+            alert("Please select atleast one hardware from the hardware dropdown menu");
+            return;
+            msgString = `${msgString} ${"Hardware"}`;
+        }
+        if (uoyDomainCBs.length <= 0) {
+            alert("Please select atleast one domain from the domain dropdown menu");
+            return;
+            msgString = `${msgString} ${"Domain"}`;
+        }
+        if (uoyRegionCBs.length <= 0) {
+            alert("Please select atleast one region from the region dropdown menu");
+            return;
+            msgString = `${msgString} ${"Region"}`;
+        }
+        //if (uoyAppCBs.length <= 0 || uoyPcCBs.length <= 0 || uoyCadAppsCBs.length <= 0 || uoyHardwareCBs.length <= 0 || uoyDomainCBs.length <= 0 || uoyRegionCBs.length <= 0) {
+        //    msgString = msgString.replace(":", "");
+        //    alert(msgString);
+        //    msgString = msgString.replace(" ", ",");
+        //    a
+        //    const finalStr = `${"Please select any option in"} ${msgString} ${"dropdown"}`;
+        //    alert(finalStr);
+        //}
+        formdata.append("UoyApps", uoyAppValues);
+        formdata.append("UoyRegion", uoyRegionValues);
+        formdata.append("UoyHardware", uoyHardwareValues);
+        formdata.append("UoyPc", uoyPcValues);
+        formdata.append("UoyCadApps", uoyCadAppsValues);
+        formdata.append("UoyDomain", uoyDomainValues);
+
+
+        $.ajax({
+            url: '/charts/MonthlyUtilizationFilter',
+            type: 'POST',
+            data: formdata,
+            processData: false,
+            contentType: false,
+            success: function (result) {
+                $('#chartdiv5').html = "";
+                InitializeMonthlyUtilizationChart(result);
+            },
+            error: function (XMLHttpRequest, textStatus, errorThrown) {
+                console.log(textStatus);
+            }
+        });
+        return false;
+    }
+    $('#MonthlyUtiization').submit(MonthlyUtiization);
+
+    filterApputilization = function (event) {
+
+        event.preventDefault();
+        var formdata = (new FormData($(this)[0]));
+        let msgString = ":";
+        //Get the selected checkboxes
+        var aumAppCBs = $('input[name="Aum_App_Mul"]:checked');
+        var aumRegionCBs = $('input[name="Aum_Region_Mul"]:checked');
+        var aumHardwareCBs = $('input[name="Aum_Hardware_Mul"]:checked');
+        var aumPcCBs = $('input[name="Aum_Pc_Mul"]:checked');
+        var aumCadAppsCBs = $('input[name="Aum_CadApps_Mul"]:checked');
+        var aumDomainCBs = $('input[name="Aum_Domain_Mul"]:checked');
+        //var checkboxes1 = $('input[name="checkbox"]:checked');
+
+        // Create an array of their values
+        var appValues = aumAppCBs.map(function () {
+            return $(this).val();
+        }).get();
+        var regionvalues = aumRegionCBs.map(function () {
+            return $(this).val();
+        }).get();
+        var hardwareValues = aumHardwareCBs.map(function () {
+            return $(this).val();
+        }).get();
+        var pcvalues = aumPcCBs.map(function () {
+            return $(this).val();
+        }).get();
+        var cadAppsValues = aumCadAppsCBs.map(function () {
+            return $(this).val();
+        }).get();
+        var domainvalues = aumDomainCBs.map(function () {
+            return $(this).val();
+        }).get();
+
+
+        if (aumAppCBs.length <= 0) {
+            alert("Please select atleast one application from the application name dropdown menu");
+            return;
+            msgString = `${msgString} ${"ApplicationName"}`;
+        }
+        if (aumCadAppsCBs.length <= 0) {
+            alert("Please select atleast one cad application from the cad application dropdown menu");
+            return;
+            msgString = `${msgString} ${"CadApplication"}`;
+        }
+        if (aumPcCBs.length <= 0) {
+            alert("Please select atleast one product category from the product category dropdown menu");
+            return;
+            msgString = `${msgString} ${"ProductCategory"}`;
+        }
+        if (aumHardwareCBs.length <= 0) {
+            alert("Please select atleast one hardware from the hardware dropdown menu");
+            return;
+            msgString = `${msgString} ${"Hardware"}`;
+        }
+        if (aumDomainCBs.length <= 0) {
+            alert("Please select atleast one domain from the domain dropdown menu");
+            return;
+            msgString = `${msgString} ${"Domain"}`;
+        }
+        if (aumRegionCBs.length <= 0) {
+            alert("Please select atleast one region from the region dropdown menu");
+            return;
+            msgString = `${msgString} ${"Region"}`;
+        }
+        //var values1 = checkboxes1.map(function () {
+        //    return $(this).val();
+        //}).get();
+
+        formdata.append("AumApps", appValues);
+        formdata.append("AumRegion", regionvalues);
+        formdata.append("AumHardware", hardwareValues);
+        formdata.append("AumPc", pcvalues);
+        formdata.append("AumCadApps", cadAppsValues);
+        formdata.append("AumDomain", domainvalues);
+
+
+        //formdata.append("DetailValues", "detail");
+        $.ajax({
+            url: '/charts/KBEApplicationsFilter',
+            type: 'POST',
+            data: formdata,
+            processData: false,
+            contentType: false,
+            success: function (result) {
+                $('#chartdiv7').html = "";
+                InitializeKBEApplicationChart(result);
+            },
+            error: function (XMLHttpRequest, textStatus, errorThrown) {
+                console.log(textStatus);
+            }
+        });
+
+
+        return false;
+    }
+    $('#filterApputilization').submit(filterApputilization);
+    @* Pecentage utilization matrix Begin *@
+    PercentageUtilization = function (event) {
+
+        event.preventDefault();
+        var formdata = (new FormData($(this)[0]));
+        //var formdata = {PC:PC,Region:Region,CAD:CAD}
+
+        var pumRegionCBs = $('input[name="Pum_Region_Mul"]:checked');
+        var pumDomainCBs = $('input[name="Pum_Domain_Mul"]:checked');
+        var pumPcCBs = $('input[name="Pum_Pc_Mul"]:checked');
+        var pumCadAppsCBs = $('input[name="Pum_CadApps_Mul"]:checked');
+
+        // Create an array of their values
+
+        var pumRegionvalues = pumRegionCBs.map(function () {
+            return $(this).val();
+        }).get();
+        var pumDomainvalues = pumDomainCBs.map(function () {
+            return $(this).val();
+        }).get();
+        var pumPcvalues = pumPcCBs.map(function () {
+            return $(this).val();
+        }).get();
+        var pumCadAppsValues = pumCadAppsCBs.map(function () {
+            return $(this).val();
+        }).get();
+
+        if (pumCadAppsCBs.length <= 0) {
+            alert("Please select atleast one cad application from the cad application dropdown menu");
+            return;
+            //msgString = `${msgString} ${"CadApplication"}`;
+        }
+        if (pumPcCBs.length <= 0) {
+            alert("Please select atleast one product category from the product category dropdown menu");
+            return;
+            //msgString = `${msgString} ${"ProductCategory"}`;
+        }
+        if (pumRegionCBs.length <= 0) {
+            alert("Please select atleast one region from the region dropdown menu");
+            return;
+            //msgString = `${msgString} ${"Region"}`;
+        }
+        if (pumDomainCBs.length <= 0) {
+            alert("Please select atleast one domian from the domain dropdown menu");
+            return;
+            //msgString = `${msgString} ${"Region"}`;
+        }
+
+        //var values1 = checkboxes1.map(function () {
+        //    return $(this).val();
+        //}).get();
+
+        formdata.append("PumRegion", pumRegionvalues);
+        formdata.append("PumDomain", pumDomainvalues);
+        formdata.append("PumPc", pumPcvalues);
+        formdata.append("PumCadApps", pumCadAppsValues);
+
+
+        $.ajax({
+            url: '/charts/PercentageUtilizationFilter',
+            type: 'POST',
+            data: formdata,
+            processData: false,
+            contentType: false,
+            beforeSend: function () {
+                $('#loadingMessage_PUHome').show();
+            },
+            success: function (result) {
+                $('#loadingMessage_PUHome').hide();
+                $('#chartdiv').empty();
+                //$('#chartdiv').html = "";
+                InitializePercentageUtilizationChart(result);
+            },
+            error: function (XMLHttpRequest, textStatus, errorThrown) {
+                console.log(textStatus);
+            }
+        });
+        return false;
+    }
+    $('#PercentageUtilization').submit(PercentageUtilization);
+    @* Pecentage utilization matrix End *@
+    function InitializeKBEApplicationChart(result) {
+
+        ////Amchart Theme
+        //am4core.useTheme(am4themes_kelly);
+        //am4core.useTheme(am4themes_animated);
+
+        //// Create chart instance
+        //chart7 = new am4core.create("chartdiv7", am4charts.XYChart);
+        //chart7.data = result;
+        //chart7.showAllValueLabels = true;
+        ////********************** Exporting  *************************
+        //chart7.exporting.menu = new am4core.ExportMenu();
+        //$('#chartdiv7').css("height", (result.length * 40).toString() + "px");
+        ////************** X Axis Information *************************
+        //var categoryAxis = chart7.yAxes.push(new am4charts.CategoryAxis());
+        //categoryAxis.dataFields.category = "title";
+        //categoryAxis.renderer.grid.template.location = 0;
+        //categoryAxis.renderer.autoGridCount = false;
+        //categoryAxis.renderer.inversed = true;
+        ////categoryAxis.renderer.labels.template.rotation = 290;
+        //categoryAxis.renderer.labels.template.horizontalCenter = "right";
+        //categoryAxis.renderer.labels.template.verticalCenter = "middle";
+        //categoryAxis.renderer.labels.template.fontSize = 10;
+
+        //categoryAxis.title.text = "CAD APPLICATION";
+        //categoryAxis.title.rotation = 0;
+        //categoryAxis.title.align = "center";
+        //categoryAxis.title.valign = "top";
+        //categoryAxis.renderer.minGridDistance = 5;
+
+        ////*************** Y Axis Information **************
+        //var valueAxis = chart7.xAxes.push(new am4charts.ValueAxis());
+        //valueAxis.title.text = "UTILIZATION (COUNT)";
+        //valueAxis.min = 0;
+        //// Create series
+        //var series = chart7.series.push(new am4charts.ColumnSeries());
+        //series.dataFields.valueX = "value";
+        //series.dataFields.categoryY = "title";
+        //series.dataFields.customTool = "customToolTip";
+        //series.name = "value";
+        //series.columns.template.tooltipText = "{customToolTip}";
+        ////series.columns.template.tooltipText = "{categoryY}: [bold]{valueX}[/]";
+        //series.columns.template.fillOpacity = .8;
+        //series.columns.template.adapter.add("fill", function (fill, target) {
+        //    return chart7.colors.getIndex(target.dataItem.index);
+        //})
+        ////  series.columns.template.column.cornerRadiusTopLeft = 10;
+        ////   series.columns.template.column.cornerRadiusTopRight = 10;
+        //series.columns.template.maxWidth = 5;
+
+        //// ********************** Bullets on the graph Series *************
+        //var labelBullet = new am4charts.LabelBullet();
+        //series.bullets.push(labelBullet);
+        //labelBullet.label.text = "{valueX.value.formatNumber('#.')}";
+        //labelBullet.strokeOpacity = 0;
+        //labelBullet.stroke = am4core.color("#dadada");
+        //labelBullet.dy = 05;
+
+        ////************ Template ***************************************
+        //var columnTemplate = series.columns.template;
+        //columnTemplate.strokeWidth = 0;
+        //columnTemplate.strokeOpacity = 1
+
+        ////document.getElementById("kbefilter").addEventListener("change", function (e) {
+        ////    let selectedStr = e.target.value;
+        ////    if (selectedStr = "High to Low") {
+        ////        sortlow_to_high(result);
+        ////    }
+        ////});
+        let selector = document.getElementById("kbefilter")
+        const selectedOption = selector.options[selector.selectedIndex].value;
+        if (selectedOption == "A to Z") {
+            sortA_to_Zkbe(result);
+        } else if (selectedOption == "High to Low") {
+            sortHigh_to_Lowkbe(result);
+        } else {
+            sortlow_to_highkbe(result);
+        }
+        selector.addEventListener("change", () => {
+            switch (selector.value) {
+                case "Low to High":
+                    sortlow_to_highkbe(result);
+                    break;
+                case "High to Low":
+                    sortHigh_to_Lowkbe(result);
+                    break;
+                case "A to Z":
+                    sortA_to_Zkbe(result);
+                    break;
+            }
+        });
+
+    }
+
+    function sortA_to_Zkbe(result) {
+        am4core.useTheme(am4themes_kelly);
+        am4core.useTheme(am4themes_animated);
+        chart7 = new am4core.create("chartdiv7", am4charts.XYChart);
+        chart7.data = result;
+        chart7.showAllValueLabels = true;
+        chart7.exporting.menu = new am4core.ExportMenu();
+        $('#chartdiv7').css("height", (result.length * 40).toString() + "px");
+        var categoryAxis = chart7.yAxes.push(new am4charts.CategoryAxis());
+        categoryAxis.dataFields.category = "title";
+        categoryAxis.renderer.grid.template.location = 0;
+        categoryAxis.renderer.autoGridCount = false;
+        //categoryAxis.renderer.labels.template.rotation = 290;
+        categoryAxis.renderer.labels.template.horizontalCenter = "right";
+        categoryAxis.renderer.labels.template.verticalCenter = "middle";
+        categoryAxis.renderer.labels.template.fontSize = 10;
+
+        categoryAxis.title.text = "CAD APPLICATION";
+        categoryAxis.title.rotation = 0;
+        categoryAxis.title.align = "center";
+        categoryAxis.title.valign = "top";
+        categoryAxis.renderer.minGridDistance = 5;
+
+        var valueAxis = chart7.xAxes.push(new am4charts.ValueAxis());
+        valueAxis.title.text = "UTILIZATION (COUNT)";
+        valueAxis.min = 0;
+
+        var series = chart7.series.push(new am4charts.ColumnSeries());
+        series.dataFields.valueX = "value";
+        series.dataFields.categoryY = "title";
+        series.dataFields.customTool = "customToolTip";
+        series.name = "value";
+        series.columns.template.tooltipText = "{customToolTip}";
+        //series.columns.template.tooltipText = "{categoryY}: [bold]{valueX}[/]";
+        series.columns.template.fillOpacity = .8;
+        series.columns.template.adapter.add("fill", function (fill, target) {
+            return chart7.colors.getIndex(target.dataItem.index);
+        })
+        //  series.columns.template.column.cornerRadiusTopLeft = 10;
+        //   series.columns.template.column.cornerRadiusTopRight = 10;
+        series.columns.template.maxWidth = 5;
+        //valueAxis.sortbyseries = series;
+        var labelBullet = new am4charts.LabelBullet();
+        series.bullets.push(labelBullet);
+        labelBullet.label.text = "{valueX.value.formatNumber('#.')}";
+        labelBullet.strokeOpacity = 0;
+        labelBullet.stroke = am4core.color("#dadada");
+        labelBullet.dy = 05;
+        var columnTemplate = series.columns.template;
+        columnTemplate.strokeWidth = 0;
+        columnTemplate.strokeOpacity = 1
+        categoryAxis.renderer.inversed = true;
+    }
+    function sortHigh_to_Lowkbe(result) {
+        am4core.useTheme(am4themes_kelly);
+        am4core.useTheme(am4themes_animated);
+        chart7 = new am4core.create("chartdiv7", am4charts.XYChart);
+        chart7.data = result;
+        chart7.showAllValueLabels = true;
+        chart7.exporting.menu = new am4core.ExportMenu();
+        $('#chartdiv7').css("height", (result.length * 40).toString() + "px");
+        var categoryAxis = chart7.yAxes.push(new am4charts.CategoryAxis());
+        categoryAxis.dataFields.category = "title";
+        categoryAxis.renderer.grid.template.location = 0;
+        categoryAxis.renderer.autoGridCount = false;
+        //categoryAxis.renderer.labels.template.rotation = 290;
+        categoryAxis.renderer.labels.template.horizontalCenter = "right";
+        categoryAxis.renderer.labels.template.verticalCenter = "middle";
+        categoryAxis.renderer.labels.template.fontSize = 10;
+
+        categoryAxis.title.text = "CAD APPLICATION";
+        categoryAxis.title.rotation = 0;
+        categoryAxis.title.align = "center";
+        categoryAxis.title.valign = "top";
+        categoryAxis.renderer.minGridDistance = 5;
+
+        var valueAxis = chart7.xAxes.push(new am4charts.ValueAxis());
+        valueAxis.title.text = "UTILIZATION (COUNT)";
+        valueAxis.min = 0;
+
+        var series = chart7.series.push(new am4charts.ColumnSeries());
+        series.dataFields.valueX = "value";
+        series.dataFields.categoryY = "title";
+        series.dataFields.customTool = "customToolTip";
+        series.name = "value";
+        series.columns.template.tooltipText = "{customToolTip}";
+        //series.columns.template.tooltipText = "{categoryY}: [bold]{valueX}[/]";
+        series.columns.template.fillOpacity = .8;
+        series.columns.template.adapter.add("fill", function (fill, target) {
+            return chart7.colors.getIndex(target.dataItem.index);
+        })
+        //  series.columns.template.column.cornerRadiusTopLeft = 10;
+        //   series.columns.template.column.cornerRadiusTopRight = 10;
+        series.columns.template.maxWidth = 5;
+        //valueAxis.sortbyseries = series;
+        var labelBullet = new am4charts.LabelBullet();
+        series.bullets.push(labelBullet);
+        labelBullet.label.text = "{valueX.value.formatNumber('#.')}";
+        labelBullet.strokeOpacity = 0;
+        labelBullet.stroke = am4core.color("#dadada");
+        labelBullet.dy = 05;
+        var columnTemplate = series.columns.template;
+        columnTemplate.strokeWidth = 0;
+        columnTemplate.strokeOpacity = 1
+        categoryAxis.sortBySeries = series;
+        categoryAxis.renderer.inversed = true;
+    }
+    function sortlow_to_highkbe(result) {
+        am4core.useTheme(am4themes_kelly);
+        am4core.useTheme(am4themes_animated);
+        chart7 = new am4core.create("chartdiv7", am4charts.XYChart);
+        chart7.data = result;
+        chart7.showAllValueLabels = true;
+        chart7.exporting.menu = new am4core.ExportMenu();
+        $('#chartdiv7').css("height", (result.length * 40).toString() + "px");
+        var categoryAxis = chart7.yAxes.push(new am4charts.CategoryAxis());
+        categoryAxis.dataFields.category = "title";
+        categoryAxis.renderer.grid.template.location = 0;
+        categoryAxis.renderer.autoGridCount = false;
+        //categoryAxis.renderer.labels.template.rotation = 290;
+        categoryAxis.renderer.labels.template.horizontalCenter = "right";
+        categoryAxis.renderer.labels.template.verticalCenter = "middle";
+        categoryAxis.renderer.labels.template.fontSize = 10;
+
+        categoryAxis.title.text = "CAD APPLICATION";
+        categoryAxis.title.rotation = 0;
+        categoryAxis.title.align = "center";
+        categoryAxis.title.valign = "top";
+        categoryAxis.renderer.minGridDistance = 5;
+
+        var valueAxis = chart7.xAxes.push(new am4charts.ValueAxis());
+        valueAxis.title.text = "UTILIZATION (COUNT)";
+        valueAxis.min = 0;
+
+        var series = chart7.series.push(new am4charts.ColumnSeries());
+        series.dataFields.valueX = "value";
+        series.dataFields.categoryY = "title";
+        series.dataFields.customTool = "customToolTip";
+        series.name = "value";
+        series.columns.template.tooltipText = "{customToolTip}";
+        //series.columns.template.tooltipText = "{categoryY}: [bold]{valueX}[/]";
+        series.columns.template.fillOpacity = .8;
+        series.columns.template.adapter.add("fill", function (fill, target) {
+            return chart7.colors.getIndex(target.dataItem.index);
+        })
+        //  series.columns.template.column.cornerRadiusTopLeft = 10;
+        //   series.columns.template.column.cornerRadiusTopRight = 10;
+        series.columns.template.maxWidth = 5;
+        //valueAxis.sortbyseries = series;
+        var labelBullet = new am4charts.LabelBullet();
+        series.bullets.push(labelBullet);
+        labelBullet.label.text = "{valueX.value.formatNumber('#.')}";
+        labelBullet.strokeOpacity = 0;
+        labelBullet.stroke = am4core.color("#dadada");
+        labelBullet.dy = 05;
+        var columnTemplate = series.columns.template;
+        columnTemplate.strokeWidth = 0;
+        columnTemplate.strokeOpacity = 1
+        categoryAxis.sortBySeries = series;
+    }
+    //function FnCall() {
+    //    alert("Function call with click addEventListener.");
+    //}
+
+
+    function InitializeKBEApplicationChartTemp(result) {
+
+        //Amchart Theme
+        am4core.useTheme(am4themes_kelly);
+        am4core.useTheme(am4themes_animated);
+
+        // Create chart instance
+        chart7 = new am4core.create("chartdiv7", am4charts.XYChart);
+
+        chart7.data = result.data;
+        chart7.showAllValueLabels = true;
+        //********************** Exporting  *************************
+        chart7.exporting.menu = new am4core.ExportMenu();
+        $('#chartdiv7').css("height", (result.length * 40).toString() + "px");
+        //************** X Axis Information *************************
+        var categoryAxis = chart7.yAxes.push(new am4charts.CategoryAxis());
+        categoryAxis.dataFields.category = "title";
+        categoryAxis.renderer.grid.template.location = 0;
+        categoryAxis.renderer.autoGridCount = false;
+        //categoryAxis.renderer.labels.template.rotation = 290;
+        categoryAxis.renderer.labels.template.horizontalCenter = "right";
+        categoryAxis.renderer.labels.template.verticalCenter = "middle";
+        categoryAxis.renderer.labels.template.fontSize = 10;
+
+        categoryAxis.title.text = "CAD APPLICATION";
+        categoryAxis.title.rotation = 0;
+        categoryAxis.title.align = "center";
+        categoryAxis.title.valign = "top";
+        categoryAxis.renderer.minGridDistance = 5;
+
+        //*************** Y Axis Information **************
+        var valueAxis = chart7.xAxes.push(new am4charts.ValueAxis());
+        valueAxis.title.text = "UTILIZATION (COUNT)";
+        valueAxis.min = 0;
+        valueAxis.extraMax = 0.1;
+        valueAxis.calculateTotals = true;
+
+        chart7.legend = new am4charts.Legend();
+        chart7.legend.position = "bottom";
+
+        chart7.legend.itemContainers.template.clickable = false;
+        chart7.legend.itemContainers.template.focusable = false;
+        chart7.legend.itemContainers.template.cursorOverStyle = am4core.MouseCursorStyle.default;
+
+        // Create series
+        var fns = result.funcNames;
+        fns.forEach(function (itm) {
+            var series = chart7.series.push(new am4charts.ColumnSeries());
+            series.dataFields.valueX = itm;
+            series.dataFields.categoryY = "title";
+            series.stacked = true;
+            series.name = itm;
+            series.columns.template.tooltipText = "{categoryY} - " + itm + ": [bold]{valueX}[/]";
+            series.columns.template.fillOpacity = .8;
+            //series.columns.template.adapter.add("fill", function (fill, target) {
+            //    return chart7.colors.getIndex(target.dataItem.index);
+            //})
+            //  series.columns.template.column.cornerRadiusTopLeft = 10;
+            //   series.columns.template.column.cornerRadiusTopRight = 10;
+            series.columns.template.maxWidth = 5;
+
+            var labelBullet = series.bullets.push(new am4charts.LabelBullet());
+            labelBullet.locationX = 0.5;
+            labelBullet.label.text = "{valueX}";
+            labelBullet.label.fill = am4core.color("black");
+
+            //let totalBullet = series.bullets.push(new am4charts.LabelBullet());
+            //totalBullet.dx = -20;
+            //totalBullet.label.text = "{valueX.total}";
+            //totalBullet.label.hideOversized = false;
+            //totalBullet.label.fontSize = 18;
+            //totalBullet.label.background.fill = totalSeries.stroke;
+            //totalBullet.label.background.fillOpacity = 0.2;
+            //totalBullet.label.padding(5, 10, 5, 10);
+
+            var columnTemplate = series.columns.template;
+            columnTemplate.strokeWidth = 0;
+            columnTemplate.strokeOpacity = 1;
+        })
+
+
+        var totalSeries = chart7.series.push(new am4charts.ColumnSeries());
+        totalSeries.dataFields.valueX = "none";
+        totalSeries.dataFields.categoryY = "title";
+        totalSeries.stacked = true;
+        totalSeries.hiddenInLegend = true;
+        totalSeries.columns.template.strokeOpacity = 0;
+
+        var totalBullet = totalSeries.bullets.push(new am4charts.LabelBullet());
+        totalBullet.dx = 20;
+        totalBullet.label.text = "{valueX.total}";
+        totalBullet.label.hideOversized = false;
+        totalBullet.label.fontSize = 12;
+        //totalBullet.label.width = 50;
+        totalBullet.label.background.fill = am4core.color("red");
+        totalBullet.label.background.fillOpacity = 0.2;
+        totalBullet.label.padding(5, 10, 5, 10);
+        totalBullet.label.hideOversized = false;
+
+        //var series = chart7.series.push(new am4charts.ColumnSeries());
+        //series.dataFields.valueX = "value";
+        //series.dataFields.categoryY = "title";
+        //series.name = "value";
+        //series.columns.template.tooltipText = "{categoryY}: [bold]{valueX}[/]";
+        //series.columns.template.fillOpacity = .8;
+        //series.columns.template.adapter.add("fill", function (fill, target) {
+        //    return chart7.colors.getIndex(target.dataItem.index);
+        //})
+        ////  series.columns.template.column.cornerRadiusTopLeft = 10;
+        ////   series.columns.template.column.cornerRadiusTopRight = 10;
+        //series.columns.template.maxWidth = 5;
+
+        //// ********************** Bullets on the graph Series *************
+        //var labelBullet = new am4charts.LabelBullet();
+        //series.bullets.push(labelBullet);
+        //labelBullet.label.text = "{valueX.value.formatNumber('#.')}";
+        //labelBullet.strokeOpacity = 0;
+        //labelBullet.stroke = am4core.color("#dadada");
+        //labelBullet.dy = 05;
+
+        //************ Template ***************************************
+        //var columnTemplate = series.columns.template;
+        //columnTemplate.strokeWidth = 0;
+        //columnTemplate.strokeOpacity = 1;
+    }
+
+    function InitializeCADApplicationChart(result) {
+
+        ////Amchart Theme
+        //am4core.useTheme(am4themes_kelly);
+        //am4core.useTheme(am4themes_animated);
+
+        //chart6 = am4core.create("chartdiv6", am4charts.XYChart);
+        //chart6.exporting.menu = new am4core.ExportMenu();
+
+        //chart6.data = result;
+
+        //// Create axes
+        //var categoryAxis = chart6.xAxes.push(new am4charts.CategoryAxis());
+        //categoryAxis.dataFields.category = "title";
+        //categoryAxis.renderer.minGridDistance = 50;
+        //categoryAxis.renderer.grid.template.location = 0;
+        //categoryAxis.renderer.labels.template.rotation = 0;
+        //categoryAxis.renderer.labels.template.horizontalCenter = "right";
+        //categoryAxis.renderer.labels.template.verticalCenter = "middle";
+        //categoryAxis.renderer.labels.template.rotation = 290;
+        //categoryAxis.title.text = "CAD SOFTWARE";
+        //categoryAxis.title.rotation = 0;
+        //categoryAxis.title.align = "center";
+        //categoryAxis.title.valign = "top";
+
+        //var valueAxis = chart6.yAxes.push(new am4charts.ValueAxis());
+        //valueAxis.title.text = "UTILIZATION (COUNT)";
+        //valueAxis.min = 0;
+        //// Create series
+        //var series = chart6.series.push(new am4charts.ColumnSeries());
+        //series.dataFields.valueY = "value";
+        //series.dataFields.categoryX = "title";
+        //series.name = "value";
+        //series.columns.template.tooltipText = "{categoryX}: [bold]{valueY}[/]";
+        //series.columns.template.fillOpacity = .8;
+        //series.columns.template.adapter.add("fill", function (fill, target) {
+        //    return chart6.colors.getIndex(target.dataItem.index);
+        //})
+        //series.columns.template.column.cornerRadiusTopLeft = 10;
+        //series.columns.template.column.cornerRadiusTopRight = 10;
+        //series.columns.template.maxWidth = 100;
+
+        //var labelBullet = new am4charts.LabelBullet();
+        //series.bullets.push(labelBullet);
+        //labelBullet.label.text = "{valueY.value.formatNumber('#.')}";
+        //labelBullet.strokeOpacity = 0;
+        //labelBullet.stroke = am4core.color("#dadada");
+        //labelBullet.dy = 05;
+
+        //var columnTemplate = series.columns.template;
+        //columnTemplate.strokeWidth = 0;
+        //columnTemplate.strokeOpacity = 1;
+        //categoryAxis.sortBySeries = series;
+        let selector = document.getElementById("cadfilter")
+        const selectedOption = selector.options[selector.selectedIndex].value;
+        if (selectedOption == "High to Low") {
+            sorthigh_to_lowcad(result);
+        } else {
+            sortlow_to_highcad(result);
+        }
+        selector.addEventListener("change", () => {
+            switch (selector.value) {
+                case "Low to High":
+                    sortlow_to_highcad(result);
+                    break;
+                case "High to Low":
+                    sorthigh_to_lowcad(result);
+                    break;
+            }
+        });
+
+    }
+    function sortlow_to_highcad(result) {
+        //Amchart Theme
+        am4core.useTheme(am4themes_kelly);
+        am4core.useTheme(am4themes_animated);
+
+        chart6 = am4core.create("chartdiv6", am4charts.XYChart);
+        chart6.exporting.menu = new am4core.ExportMenu();
+
+        chart6.data = result;
+
+        // Create axes
+        var categoryAxis = chart6.xAxes.push(new am4charts.CategoryAxis());
+        categoryAxis.dataFields.category = "title";
+        categoryAxis.renderer.minGridDistance = 50;
+        categoryAxis.renderer.grid.template.location = 0;
+        categoryAxis.renderer.labels.template.rotation = 0;
+        categoryAxis.renderer.labels.template.horizontalCenter = "right";
+        categoryAxis.renderer.labels.template.verticalCenter = "middle";
+        categoryAxis.renderer.labels.template.rotation = 290;
+        categoryAxis.title.text = "CAD SOFTWARE";
+        categoryAxis.title.rotation = 0;
+        categoryAxis.title.align = "center";
+        categoryAxis.title.valign = "top";
+
+        var valueAxis = chart6.yAxes.push(new am4charts.ValueAxis());
+        valueAxis.title.text = "UTILIZATION (COUNT)";
+        valueAxis.min = 0;
+        // Create series
+        var series = chart6.series.push(new am4charts.ColumnSeries());
+        series.dataFields.valueY = "value";
+        series.dataFields.categoryX = "title";
+        series.name = "value";
+        series.columns.template.tooltipText = "{categoryX}: [bold]{valueY}[/]";
+        series.columns.template.fillOpacity = .8;
+        series.columns.template.adapter.add("fill", function (fill, target) {
+            return chart6.colors.getIndex(target.dataItem.index);
+        })
+        series.columns.template.column.cornerRadiusTopLeft = 10;
+        series.columns.template.column.cornerRadiusTopRight = 10;
+        series.columns.template.maxWidth = 100;
+
+        var labelBullet = new am4charts.LabelBullet();
+        series.bullets.push(labelBullet);
+        labelBullet.label.text = "{valueY.value.formatNumber('#.')}";
+        labelBullet.strokeOpacity = 0;
+        labelBullet.stroke = am4core.color("#dadada");
+        labelBullet.dy = 05;
+
+        var columnTemplate = series.columns.template;
+        columnTemplate.strokeWidth = 0;
+        columnTemplate.strokeOpacity = 1;
+
+        categoryAxis.sortBySeries = series;
+        categoryAxis.renderer.inversed = true;
+    }
+    function sorthigh_to_lowcad(result) {
+        am4core.useTheme(am4themes_kelly);
+        am4core.useTheme(am4themes_animated);
+
+        chart6 = am4core.create("chartdiv6", am4charts.XYChart);
+        chart6.exporting.menu = new am4core.ExportMenu();
+
+        chart6.data = result;
+
+        // Create axes
+        var categoryAxis = chart6.xAxes.push(new am4charts.CategoryAxis());
+        categoryAxis.dataFields.category = "title";
+        categoryAxis.renderer.minGridDistance = 50;
+        categoryAxis.renderer.grid.template.location = 0;
+        categoryAxis.renderer.labels.template.rotation = 0;
+        categoryAxis.renderer.labels.template.horizontalCenter = "right";
+        categoryAxis.renderer.labels.template.verticalCenter = "middle";
+        categoryAxis.renderer.labels.template.rotation = 290;
+        categoryAxis.title.text = "CAD SOFTWARE";
+        categoryAxis.title.rotation = 0;
+        categoryAxis.title.align = "center";
+        categoryAxis.title.valign = "top";
+
+        var valueAxis = chart6.yAxes.push(new am4charts.ValueAxis());
+        valueAxis.title.text = "UTILIZATION (COUNT)";
+        valueAxis.min = 0;
+        // Create series
+        var series = chart6.series.push(new am4charts.ColumnSeries());
+        series.dataFields.valueY = "value";
+        series.dataFields.categoryX = "title";
+        series.name = "value";
+        series.columns.template.tooltipText = "{categoryX}: [bold]{valueY}[/]";
+        series.columns.template.fillOpacity = .8;
+        series.columns.template.adapter.add("fill", function (fill, target) {
+            return chart6.colors.getIndex(target.dataItem.index);
+        })
+        series.columns.template.column.cornerRadiusTopLeft = 10;
+        series.columns.template.column.cornerRadiusTopRight = 10;
+        series.columns.template.maxWidth = 100;
+
+        var labelBullet = new am4charts.LabelBullet();
+        series.bullets.push(labelBullet);
+        labelBullet.label.text = "{valueY.value.formatNumber('#.')}";
+        labelBullet.strokeOpacity = 0;
+        labelBullet.stroke = am4core.color("#dadada");
+        labelBullet.dy = 05;
+
+        var columnTemplate = series.columns.template;
+        columnTemplate.strokeWidth = 0;
+        columnTemplate.strokeOpacity = 1;
+
+        categoryAxis.sortBySeries = series;
+    }
+    @* Pecentage utilization matrix Begin *@
+    //function InitializePercentageUtilizationChart(result) {
+
+    //    // Themes begin
+    //    am4core.useTheme(am4themes_animated);
+    //    am4core.useTheme(am4themes_kelly);
+    //    // Themes end
+
+    //    // Create chart instance
+    //    chart = am4core.create("chartdiv", am4charts.PieChart);
+    //    chart.exporting.menu = new am4core.ExportMenu();
+
+    //    chart.data = result;
+
+    //    // Set inner radius
+    //    chart.innerRadius = am4core.percent(50);
+    //    //chart.legend = new am4charts.Legend();
+    //    // Add and configure Series
+    //    var pieSeries = chart.series.push(new am4charts.PieSeries());
+    //    pieSeries.dataFields.value = "value";
+    //    pieSeries.dataFields.category = "title";
+    //    pieSeries.slices.template.stroke = am4core.color("#fff");
+    //    pieSeries.slices.template.strokeWidth = 2;
+    //    pieSeries.slices.template.strokeOpacity = 1;
+
+
+    //    // This creates initial animation
+    //    pieSeries.hiddenState.properties.opacity = 1;
+    //    pieSeries.hiddenState.properties.endAngle = -90;
+    //    pieSeries.hiddenState.properties.startAngle = -90;
+    //    pieSeries.labels.template.text = "{category}: {value.percent.formatNumber('#.0')}% ({actual})";
+    //    console.info(pieSeries.labels.template.text);
+    //}
+    function InitializePercentageUtilizationChart(result) {
+
+
+        result.sort(function (a, b) {
+            return b.value - a.value;
+        });
+
+        am4core.useTheme(am4themes_animated);
+        am4core.useTheme(am4themes_kelly);
+
+        var chart = am4core.create("chartdiv", am4charts.PieChart);
+        chart.exporting.menu = new am4core.ExportMenu();
+
+        chart.data = result;
+
+
+        chart.innerRadius = am4core.percent(50);
+
+
+        var pieSeries = chart.series.push(new am4charts.PieSeries());
+        pieSeries.dataFields.value = "value";
+        pieSeries.dataFields.category = "title";
+
+
+        pieSeries.slices.template.stroke = am4core.color("#fff");
+        pieSeries.slices.template.strokeWidth = 2;
+        pieSeries.slices.template.strokeOpacity = 1;
+        pieSeries.slices.template.clockwise = true;
+
+
+        pieSeries.hiddenState.properties.opacity = 1;
+        pieSeries.hiddenState.properties.endAngle = -90;
+        pieSeries.hiddenState.properties.startAngle = -90;
+
+
+        pieSeries.slices.template.tooltipText =
+            "{category}: {value.percent.formatNumber('#.0')}% ({actual})";
+
+        pieSeries.labels.template.text =
+            "{category}: {value.percent.formatNumber('#.0')}% ({actual})";
+    }
+    @* Pecentage utilization matrix End *@
+    function InitializeMonthlyUtilizationChart(result) {
+        //// Themes begin
+        //am4core.useTheme(am4themes_kelly);
+        //am4core.useTheme(am4themes_animated);
+
+
+        //// Create chart instance
+        //chart5 = am4core.create("chartdiv5", am4charts.XYChart);
+        //chart5.exporting.menu = new am4core.ExportMenu();
+
+        //chart5.data = result;
+
+        //// Create axes
+        //var categoryAxis = chart5.xAxes.push(new am4charts.CategoryAxis());
+        //categoryAxis.dataFields.category = "title";
+        //categoryAxis.renderer.grid.template.location = 0;
+        //categoryAxis.renderer.minGridDistance = 30;
+        //categoryAxis.renderer.labels.template.rotation = 0;
+        //categoryAxis.renderer.labels.template.rotation = 290;
+        //categoryAxis.title.text = "MONTHLY UTILIZATION";
+        //categoryAxis.title.rotation = 0;
+        //categoryAxis.title.align = "center";
+        //categoryAxis.title.valign = "top";
+        //categoryAxis.renderer.minGridDistance = 50;
+
+        //var valueAxis = chart5.yAxes.push(new am4charts.ValueAxis());
+        //valueAxis.title.text = "UTILIZATION (COUNT)";
+        //valueAxis.min = 0;
+        //// Create series
+        //var series = chart5.series.push(new am4charts.ColumnSeries());
+        ////series.bullets.push(labelBullet);
+        //series.dataFields.valueY = "value";
+        //series.dataFields.categoryX = "title";
+        //series.name = "value";
+        //series.columns.template.tooltipText = "{categoryX}: [bold]{valueY}[/]";
+        //series.columns.template.fillOpacity = .8;
+        //series.columns.template.adapter.add("fill", function (fill, target) {
+        //    return chart5.colors.getIndex(target.dataItem.index);
+        //})
+        //series.columns.template.column.cornerRadiusTopLeft = 10;
+        //series.columns.template.column.cornerRadiusTopRight = 10;
+        //series.columns.template.maxWidth = 100;
+
+        //var labelBullet = new am4charts.LabelBullet();
+
+        //labelBullet.label.text = "{value}";
+        //labelBullet.strokeOpacity = 0;
+        //labelBullet.stroke = am4core.color("#dadada");
+        //labelBullet.dy = 05;
+
+        //series.bullets.push(labelBullet);
+
+        //var columnTemplate = series.columns.template;
+        //columnTemplate.strokeWidth = 0;
+        //columnTemplate.strokeOpacity = 1;
+        let selector = document.getElementById("utoveryrfilter")
+        const selectedOption = selector.options[selector.selectedIndex].value;
+        if (selectedOption == "Jan to Dec") {
+            sortjan_to_decuoy(result);
+        } else if (selectedOption == "High to Low") {
+            sorthigh_to_low_uoy(result);
+        } else {
+            sortlow_to_high_uoy(result);
+        }
+        selector.addEventListener("change", () => {
+            switch (selector.value) {
+                case "Low to High":
+                    sortlow_to_high_uoy(result);
+                    break;
+                case "High to Low":
+                    sorthigh_to_low_uoy(result);
+                    break;
+                case "Jan to Dec":
+                    sortjan_to_decuoy(result);
+                    break;
+            }
+        });
+
+    }
+    function sortjan_to_decuoy(result) {
+        am4core.useTheme(am4themes_kelly);
+        am4core.useTheme(am4themes_animated);
+
+
+        // Create chart instance
+        chart5 = am4core.create("chartdiv5", am4charts.XYChart);
+        chart5.exporting.menu = new am4core.ExportMenu();
+
+        chart5.data = result;
+
+        // Create axes
+        var categoryAxis = chart5.xAxes.push(new am4charts.CategoryAxis());
+        categoryAxis.dataFields.category = "title";
+        categoryAxis.renderer.grid.template.location = 0;
+        categoryAxis.renderer.minGridDistance = 30;
+        categoryAxis.renderer.labels.template.rotation = 0;
+        categoryAxis.renderer.labels.template.rotation = 290;
+        categoryAxis.title.text = "MONTHLY UTILIZATION";
+        categoryAxis.title.rotation = 0;
+        categoryAxis.title.align = "center";
+        categoryAxis.title.valign = "top";
+        categoryAxis.renderer.minGridDistance = 50;
+
+        var valueAxis = chart5.yAxes.push(new am4charts.ValueAxis());
+        valueAxis.title.text = "UTILIZATION (COUNT)";
+        valueAxis.min = 0;
+        // Create series
+        var series = chart5.series.push(new am4charts.ColumnSeries());
+        //series.bullets.push(labelBullet);
+        series.dataFields.valueY = "value";
+        series.dataFields.categoryX = "title";
+        series.name = "value";
+        series.columns.template.tooltipText = "{categoryX}: [bold]{valueY}[/]";
+        series.columns.template.fillOpacity = .8;
+        series.columns.template.adapter.add("fill", function (fill, target) {
+            return chart5.colors.getIndex(target.dataItem.index);
+        })
+        series.columns.template.column.cornerRadiusTopLeft = 10;
+        series.columns.template.column.cornerRadiusTopRight = 10;
+        series.columns.template.maxWidth = 100;
+
+        var labelBullet = new am4charts.LabelBullet();
+
+        labelBullet.label.text = "{value}";
+        labelBullet.strokeOpacity = 0;
+        labelBullet.stroke = am4core.color("#dadada");
+        labelBullet.dy = 05;
+
+        series.bullets.push(labelBullet);
+
+        var columnTemplate = series.columns.template;
+        columnTemplate.strokeWidth = 0;
+        columnTemplate.strokeOpacity = 1;
+    }
+    function sortlow_to_high_uoy(result) {
+        am4core.useTheme(am4themes_kelly);
+        am4core.useTheme(am4themes_animated);
+
+
+        // Create chart instance
+        chart5 = am4core.create("chartdiv5", am4charts.XYChart);
+        chart5.exporting.menu = new am4core.ExportMenu();
+
+        chart5.data = result;
+
+        // Create axes
+        var categoryAxis = chart5.xAxes.push(new am4charts.CategoryAxis());
+        categoryAxis.dataFields.category = "title";
+        categoryAxis.renderer.grid.template.location = 0;
+        categoryAxis.renderer.minGridDistance = 30;
+        categoryAxis.renderer.labels.template.rotation = 0;
+        categoryAxis.renderer.labels.template.rotation = 290;
+        categoryAxis.title.text = "MONTHLY UTILIZATION";
+        categoryAxis.title.rotation = 0;
+        categoryAxis.title.align = "center";
+        categoryAxis.title.valign = "top";
+        categoryAxis.renderer.minGridDistance = 50;
+
+        var valueAxis = chart5.yAxes.push(new am4charts.ValueAxis());
+        valueAxis.title.text = "UTILIZATION (COUNT)";
+        valueAxis.min = 0;
+        // Create series
+        var series = chart5.series.push(new am4charts.ColumnSeries());
+        //series.bullets.push(labelBullet);
+        series.dataFields.valueY = "value";
+        series.dataFields.categoryX = "title";
+        series.name = "value";
+        series.columns.template.tooltipText = "{categoryX}: [bold]{valueY}[/]";
+        series.columns.template.fillOpacity = .8;
+        series.columns.template.adapter.add("fill", function (fill, target) {
+            return chart5.colors.getIndex(target.dataItem.index);
+        })
+        series.columns.template.column.cornerRadiusTopLeft = 10;
+        series.columns.template.column.cornerRadiusTopRight = 10;
+        series.columns.template.maxWidth = 100;
+
+        var labelBullet = new am4charts.LabelBullet();
+
+        labelBullet.label.text = "{value}";
+        labelBullet.strokeOpacity = 0;
+        labelBullet.stroke = am4core.color("#dadada");
+        labelBullet.dy = 05;
+
+        series.bullets.push(labelBullet);
+
+        var columnTemplate = series.columns.template;
+        columnTemplate.strokeWidth = 0;
+        columnTemplate.strokeOpacity = 1;
+        categoryAxis.sortBySeries = series;
+        categoryAxis.renderer.inversed = true;
+
+
+
+    }
+    function sorthigh_to_low_uoy(result) {
+        am4core.useTheme(am4themes_kelly);
+        am4core.useTheme(am4themes_animated);
+
+
+        // Create chart instance
+        chart5 = am4core.create("chartdiv5", am4charts.XYChart);
+        chart5.exporting.menu = new am4core.ExportMenu();
+
+        chart5.data = result;
+
+        // Create axes
+        var categoryAxis = chart5.xAxes.push(new am4charts.CategoryAxis());
+        categoryAxis.dataFields.category = "title";
+        categoryAxis.renderer.grid.template.location = 0;
+        categoryAxis.renderer.minGridDistance = 30;
+        categoryAxis.renderer.labels.template.rotation = 0;
+        categoryAxis.renderer.labels.template.rotation = 290;
+        categoryAxis.title.text = "MONTHLY UTILIZATION";
+        categoryAxis.title.rotation = 0;
+        categoryAxis.title.align = "center";
+        categoryAxis.title.valign = "top";
+        categoryAxis.renderer.minGridDistance = 50;
+
+        var valueAxis = chart5.yAxes.push(new am4charts.ValueAxis());
+        valueAxis.title.text = "UTILIZATION (COUNT)";
+        valueAxis.min = 0;
+        // Create series
+        var series = chart5.series.push(new am4charts.ColumnSeries());
+        //series.bullets.push(labelBullet);
+        series.dataFields.valueY = "value";
+        series.dataFields.categoryX = "title";
+        series.name = "value";
+        series.columns.template.tooltipText = "{categoryX}: [bold]{valueY}[/]";
+        series.columns.template.fillOpacity = .8;
+        series.columns.template.adapter.add("fill", function (fill, target) {
+            return chart5.colors.getIndex(target.dataItem.index);
+        })
+        series.columns.template.column.cornerRadiusTopLeft = 10;
+        series.columns.template.column.cornerRadiusTopRight = 10;
+        series.columns.template.maxWidth = 100;
+
+        var labelBullet = new am4charts.LabelBullet();
+
+        labelBullet.label.text = "{value}";
+        labelBullet.strokeOpacity = 0;
+        labelBullet.stroke = am4core.color("#dadada");
+        labelBullet.dy = 05;
+
+        series.bullets.push(labelBullet);
+
+        var columnTemplate = series.columns.template;
+        columnTemplate.strokeWidth = 0;
+        columnTemplate.strokeOpacity = 1;
+        categoryAxis.sortBySeries = series;
+    }
+
+    $("#PDF-6").click(function (e) {
+        e.preventDefault();
+        chart6.exporting.export("pdf");
+    });
+
+    $("#JPG-6").click(function (e) {
+        e.preventDefault();
+        chart6.exporting.export("jpg");
+    });
+
+    $("#PDF-7").click(function (e) {
+        e.preventDefault();
+        chart7.exporting.export("pdf");
+    });
+
+    $("#JPG-7").click(function (e) {
+        e.preventDefault();
+        chart7.exporting.export("jpg");
+    });
+
+    $("#PDF-5").click(function (e) {
+        e.preventDefault();
+        chart5.exporting.export("pdf");
+    });
+
+    $("#JPG-5").click(function (e) {
+        e.preventDefault();
+        chart5.exporting.export("jpg");
+    });
+
+
+
+    var today = new Date();
+    var dd = today.getDate();
+    var mm = today.getMonth() + 1; //January is 0!
+    var yyyy = today.getFullYear();
+    if (dd < 10) {
+        dd = '0' + dd
+    }
+    if (mm < 10) {
+        mm = '0' + mm
+    }
+    today = yyyy + '-' + mm + '-' + dd;
+
+    document.getElementById("MUG_Datepick1").setAttribute("max", today);
+    document.getElementById("MUG_Datepick2").setAttribute("max", today);
+    document.getElementById("CAD_Datepick1").setAttribute("max", today);
+    document.getElementById("CAD_Datepick2").setAttribute("max", today);
+    document.getElementById("KBEAPP_Datepick1").setAttribute("max", today);
+    document.getElementById("KBEAPP_Datepick2").setAttribute("max", today);
+    document.getElementById("AppDataDatePick1").setAttribute("max", today);
+    document.getElementById("AppDataDatePick2").setAttribute("max", today);
+
+
+    $('#MUG_Datepick1').change(function () {
+
+        var from = $("#MUG_Datepick1").val();
+        var to = $("#MUG_Datepick2").val();
+        if (Date.parse(from) > Date.parse(to)) {
+            alert("Invalid Date Range");
+        }
+        //console.log($('#MUG_Datepick1').val());
+    });
+
+
+    mugdatepick2change = function () {
+        var from = $("#MUG_Datepick1").val();
+        var to = $("#MUG_Datepick2").val();
+        if (Date.parse(from) > Date.parse(to)) {
+            alert("Invalid Date Range");
+        }
+    }
+
+    $('#MUG_Datepick2').change(function () {
+
+        var from = $("#MUG_Datepick1").val();
+        var to = $("#MUG_Datepick2").val();
+        if (Date.parse(from) > Date.parse(to)) {
+            alert("Invalid Date Range");
+        }
+        //console.log($('#MUG_Datepick1').val());
+    });
+
+    $('#CAD_Datepick1').change(function () {
+
+        var from = $("#CAD_Datepick1").val();
+        var to = $("#CAD_Datepick2").val();
+        if (Date.parse(from) > Date.parse(to)) {
+            alert("Invalid Date Range");
+        }
+        //console.log($('#MUG_Datepick1').val());
+    });
+
+    $('#CAD_Datepick2').change(function () {
+
+        var from = $("#CAD_Datepick1").val();
+        var to = $("#CAD_Datepick2").val();
+        //var en = GetEnvironmentVariableValue("CAD_CONF_BASE");
+        if (Date.parse(from) > Date.parse(to)) {
+            alert(en);
+        }
+        //console.log($('#MUG_Datepick1').val());
+    });
+
+    $('#KBEAPP_Datepick1').change(function () {
+
+        var from = $("#KBEAPP_Datepick1").val();
+        var to = $("#KBEAPP_Datepick2").val();
+        if (Date.parse(from) > Date.parse(to)) {
+            alert("Invalid Date Range");
+        }
+        //console.log($('#MUG_Datepick1').val());
+    });
+
+    $('#KBEAPP_Datepick2').change(function () {
+
+        var from = $("#KBEAPP_Datepick1").val();
+        var to = $("#KBEAPP_Datepick2").val();
+        if (Date.parse(from) > Date.parse(to)) {
+            alert("Invalid Date Range");
+        }
+        //console.log($('#MUG_Datepick1').val());
+    });
+
+    $('#AppDataDatePick1').change(function () {
+
+        var from = $("#AppDataDatePick1").val();
+        var to = $("#AppDataDatePick2").val();
+
+        if (Date.parse(fromformatted) > Date.parse(fromformatted)) {
+            alert("Invalid Date Range");
+        }
+        //console.log($('#MUG_Datepick1').val());
+    });
+
+    $('#AppDataDatePick2').change(function () {
+
+        var from = $("#AppDataDatePick1").val();
+        var to = $("#AppDataDatePick2").val();
+
+        if (Date.parse(fromformatted) > Date.parse(fromformatted)) {
+            alert("Invalid Date Range");
+        }
+        //console.log($('#MUG_Datepick1').val());
+    });
+    function formatDate(date) {
+        var day = ("0" + date.getDate()).slice(-2);
+        var month = ("0" + (date.getMonth() + 1)).slice(-2);
+        var year = date.getFullYear();
+        return day + "/" + month + "/" + year;
+    }
+
+    $("#downloadAllData").click(function (e) {
+        var rawdata;
+        var inputdata;
+        let dateValue1 = $("#MUG_Datepick1").val();
+        let [month1, day1, year1] = dateValue1.split("/");
+        let formattedDate1 = `${day1}/${month1}/${year1}`;
+        let dateValue2 = $("#MUG_Datepick2").val();
+        let [month2, day2, year2] = dateValue2.split("/");
+        let formattedDate2 = `${day2}/${month2}/${year2}`;
+        //inputdata = {
+
+        //    PC: $("#MON_Pc").val(),
+        //    Region: $("#MON_Region").val(),
+        //    CAD: $("#MON_CadApps").val(),
+        //    App: $("#MON_App").val(),
+        //    fromdate: $("#MUG_Datepick1").val(),
+        //    todate: $("#MUG_Datepick2").val()
+        //}
+        var uoyAppCBs = $('input[name="Uoy_App_Mul"]:checked');
+        var uoyRegionCBs = $('input[name="Uoy_Region_Mul"]:checked');
+        var uoyHardwareCBs = $('input[name="Uoy_Hardware_Mul"]:checked');
+        var uoyPcCBs = $('input[name="Uoy_Pc_Mul"]:checked');
+        var uoyCadAppsCBs = $('input[name="Uoy_CadApps_Mul"]:checked');
+        var uoyDomainCBs = $('input[name="Uoy_Domain_Mul"]:checked');
+
+        var uoyAppValues = uoyAppCBs.map(function () {
+            return $(this).val();
+        }).get();
+        var uoyRegionValues = uoyRegionCBs.map(function () {
+            return $(this).val();
+        }).get();
+        var uoyHardwareValues = uoyHardwareCBs.map(function () {
+            return $(this).val();
+        }).get();
+        var uoyPcValues = uoyPcCBs.map(function () {
+            return $(this).val();
+        }).get();
+        var uoyCadAppsValues = uoyCadAppsCBs.map(function () {
+            return $(this).val();
+        }).get();
+        var uoyDomainValues = uoyDomainCBs.map(function () {
+            return $(this).val();
+        }).get();
+        if (uoyAppCBs.length <= 0) {
+            alert("Please select atleast one application from the application name dropdown menu");
+            return;
+            msgString = `${msgString} ${"ApplicationName"}`;
+        }
+        if (uoyCadAppsCBs.length <= 0) {
+            alert("Please select atleast one cad application from the cad application dropdown menu");
+            return;
+            msgString = `${msgString} ${"CadApplication"}`;
+        }
+        if (uoyPcCBs.length <= 0) {
+            alert("Please select atleast one product category from the product category dropdown menu");
+            return;
+            msgString = `${msgString} ${"ProductCategory"}`;
+        }
+        if (uoyHardwareCBs.length <= 0) {
+            alert("Please select atleast one hardware from the hardware dropdown menu");
+            return;
+            msgString = `${msgString} ${"Hardware"}`;
+        }
+        if (uoyDomainCBs.length <= 0) {
+            alert("Please select atleast one domain from the domain dropdown menu");
+            return;
+            msgString = `${msgString} ${"Domain"}`;
+        }
+        if (uoyRegionCBs.length <= 0) {
+            alert("Please select atleast one region from the region dropdown menu");
+            return;
+            msgString = `${msgString} ${"Region"}`;
+        }
+        inputdata = {
+
+            Pc: uoyPcValues,
+            Region: uoyRegionValues,
+            CadApps: uoyCadAppsValues,
+            App: uoyAppValues,
+            Hardware: uoyHardwareValues,
+            Domain: uoyDomainValues,
+            ////***********For our local deployment**********
+            //fromdate: formattedDate1,
+            //todate: formattedDate2
+            //***********For cooper deployment**********
+            fromdate: $("#MUG_Datepick1").val(),
+            todate: $("#MUG_Datepick2").val()
+
+        }
+        $.ajax({
+            type: "POST",
+            url: "/Charts/Rawdata",
+            contentType: "application/json; charset=utf-8",
+            dataType: "json",
+            data: JSON.stringify(inputdata),
+            success: function (result) {
+                rawdata = result;
+                var filename = "UsageData " + today;
+                JSONToCSVConvertor(rawdata, filename, true)
+            },
+            error: function (XMLHttpRequest, textStatus, errorThrown) {
+                console.log(textStatus);
+            }
+
+        });
+
+
+    });
+
+    $("#AppdownloadAllData").click(function (e) {
+        var rawdata;
+        var inputdata;
+        let dateValue1 = $("#AppDataDatePick1").val();
+        let [month1, day1, year1] = dateValue1.split("/");
+        let formattedDate1 = `${day1}/${month1}/${year1}`;
+        let dateValue2 = $("#AppDataDatePick2").val();
+        let [month2, day2, year2] = dateValue2.split("/");
+        let formattedDate2 = `${day2}/${month2}/${year2}`;
+        //alert(formattedDate1);
+        //alert(formattedDate2);
+        var appdataCadAppsCBs = $('input[name="AppData_CadApps_Mul"]:checked');
+        var appdataDataCategoryCBs = $('input[name="AppData_DataCategory_Mul"]:checked');
+
+        var appdataCadAppsValues = appdataCadAppsCBs.map(function () {
+            return $(this).val();
+        }).get();
+        var appdataDataCategoryValues = appdataDataCategoryCBs.map(function () {
+            return $(this).val();
+        }).get();
+
+        if (appdataCadAppsCBs.length <= 0) {
+            alert("Please select atleast one cad application from the cad application dropdown menu");
+            return;
+            msgString = `${msgString} ${"CadApplication"}`;
+        }
+        if (appdataDataCategoryCBs.length <= 0) {
+            alert("Please select atleast one data category from the data category dropdown menu");
+            return;
+            msgString = `${msgString} ${"DataCategory"}`;
+        }
+        inputdata = {
+
+            App: $("#AppData_App").val(),
+            CadApps: appdataCadAppsValues,
+            DataCategory: appdataDataCategoryValues,
+            ////***********For our local deployment**********
+            //fromdate: formattedDate1,
+            //todate: formattedDate2
+            //***********For cooper deployment**********
+            fromdate: $("#AppDataDatePick1").val(),
+            todate: $("#AppDataDatePick2").val()
+        }
+
+        $.ajax({
+            type: "POST",
+            url: "/Charts/AppData",
+            contentType: "application/json; charset=utf-8",
+            dataType: "json",
+            data: JSON.stringify(inputdata),
+            success: function (result) {
+                rawdata = result;
+                var selapp = $("#AppData_App").val();
+                if (selapp == "SMART CVT") {
+                    //alert("SMT")
+                    var filename = "SmartCVTBlockData " + today;
+                    JSONToCSVConvertorForSmartCVT(rawdata, filename, true)
+                }
+                else if (selapp == "POINT CHART") {
+                    //alert("POINT")
+                    var filename = "PointChartData " + today;
+                    JSONToCSVConvertorForPointChart(rawdata, filename, true)
+                }
+                else if (selapp == "PROFILE CHECKER") {
+                    //alert("POINT")
+                    var filename = "ProfileCheckerData " + today;
+                    JSONToCSVConvertorForProfileChecker(rawdata, filename, true)
+                }
+                else if (selapp == "FILE MANAGER") {
+                    //alert("POINT")
+                    var filename = "FileManagerData " + today;
+                    JSONToCSVConvertorForNamingTool(rawdata, filename, true)
+                }
+                else if (selapp == "MULTI 3D") {
+                    //alert("POINT")
+                    var filename = "Multi3DData " + today;
+                    JSONToCSVConvertorForMulti3D(rawdata, filename, true)
+                }
+                else if (selapp == "SECTION MANAGER") {
+                    //alert("POINT")
+                    var filename = "SectionManagerData " + today;
+                    JSONToCSVConvertorForSectionManager(rawdata, filename, true)
+                }
+                else if (selapp == "3D TRIM") {
+                    //alert("POINT")
+                    var filename = "3DTrimData " + today;
+                    JSONToCSVConvertorForTrim(rawdata, filename, true)
+                }
+
+            },
+            error: function (XMLHttpRequest, textStatus, errorThrown) {
+                console.log(textStatus);
+            }
+
+        });
+
+
+    });
+    function JSONToCSVConvertorForPointChart(JSONData, ReportTitle, ShowLabel) {
+        //If JSONData is not an object then JSON.parse will parse the JSON string in an Object
+        var arrData = typeof JSONData != 'object' ? JSON.parse(JSONData) : JSONData;
+
+        var CSV = '';
+        //Set Report title in first row or line
+
+        CSV += ReportTitle + '\r\n\n';
+
+        //This condition will generate the Label/Header
+        if (ShowLabel) {
+            var row = "";
+
+            //This loop will extract the label from 1st index of on array
+            for (var index in arrData[0]) {
+
+                if (index == "StartTime")
+                    index = "Date";
+                //if (index == "StopTime")
+                //    index = "StopDate";
+                if (index == "StopTime")
+                    continue;
+
+                //Now convert each value to string and comma-seprated
+                row += index + ',';
+            }
+
+            row = row.slice(0, -1);
+
+            //append Label row with line break
+            CSV += row + '\r\n';
+        }
+
+        //1st loop is to extract each row
+        for (var i = 0; i < arrData.length; i++) {
+            var row = "";
+
+            //2nd loop will extract each column and convert it in string comma-seprated
+            for (var index in arrData[i]) {
+                if (index == "StopTime")
+                    continue;
+                if (index == "StartTime") {
+                    var value = arrData[i][index];
+                    ///alert(value);
+                    var val2 = GetDate(value);
+                    //alert(value);
+                    row += '"' + val2 + '",';
+                }
+                else {
+                    row += '"' + arrData[i][index] + '",';
+                }
+            }
+
+            row.slice(0, row.length - 1);
+
+            //add a line break after each row
+            CSV += row + '\r\n';
+
+        }
+
+        //alert(CSV);
+
+        if (CSV == '') {
+            alert("Invalid data");
+            return;
+        }
+
+        //Generate a file name
+        var fileName = "MyReport_";
+        if (isIE()) {
+            var fileData = 'sep=,\r\n' + CSV;
+            var blobObject = new Blob([fileData], { type: "text/csv;charset=utf-8;" });
+            window.navigator.msSaveBlob(blobObject, 'MyReport.csv');
+        } else {
+
+            //this will remove the blank-spaces from the title and replace it with an underscore
+            fileName += ReportTitle.replace(/ /g, "_");
+
+            //Initialize file format you want csv or xls
+            var uri = 'data:text/csv;charset=utf-8,' + escape(CSV);
+
+            // Now the little tricky part.
+            // you can use either>> window.open(uri);
+            // but this will not work in some browsers
+            // or you will not get the correct file extension
+
+            //this trick will generate a temp <a /> tag
+            var link = document.createElement("a");
+            link.href = uri;
+
+            //set the visibility hidden so it will not effect on your web-layout
+            link.style = "visibility:hidden";
+            link.download = fileName + ".csv";
+
+            //this part will append the anchor tag and remove it after automatic click
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+
+        }
+
+    }
+    function JSONToCSVConvertorForProfileChecker(JSONData, ReportTitle, ShowLabel) {
+        //If JSONData is not an object then JSON.parse will parse the JSON string in an Object
+        var arrData = typeof JSONData != 'object' ? JSON.parse(JSONData) : JSONData;
+
+        var CSV = '';
+        //Set Report title in first row or line
+
+        CSV += ReportTitle + '\r\n\n';
+
+        //This condition will generate the Label/Header
+        if (ShowLabel) {
+            var row = "";
+
+            //This loop will extract the label from 1st index of on array
+            for (var index in arrData[0]) {
+
+                if (index == "StartTime")
+                    index = "Date";
+                //if (index == "StopTime")
+                //    index = "StopDate";
+                if (index == "StopTime")
+                    continue;
+
+                //Now convert each value to string and comma-seprated
+                row += index + ',';
+            }
+
+            row = row.slice(0, -1);
+
+            //append Label row with line break
+            CSV += row + '\r\n';
+        }
+
+        //1st loop is to extract each row
+        for (var i = 0; i < arrData.length; i++) {
+            var row = "";
+
+            //2nd loop will extract each column and convert it in string comma-seprated
+            for (var index in arrData[i]) {
+                if (index == "StopTime")
+                    continue;
+                if (index == "StartTime") {
+                    var value = arrData[i][index];
+                    ///alert(value);
+                    var val2 = GetDate(value);
+                    //alert(value);
+                    row += '"' + val2 + '",';
+                }
+                else {
+                    row += '"' + arrData[i][index] + '",';
+                }
+            }
+
+            row.slice(0, row.length - 1);
+
+            //add a line break after each row
+            CSV += row + '\r\n';
+
+        }
+
+        //alert(CSV);
+
+        if (CSV == '') {
+            alert("Invalid data");
+            return;
+        }
+
+        //Generate a file name
+        var fileName = "MyReport_";
+        if (isIE()) {
+            var fileData = 'sep=,\r\n' + CSV;
+            var blobObject = new Blob([fileData], { type: "text/csv;charset=utf-8;" });
+            window.navigator.msSaveBlob(blobObject, 'MyReport.csv');
+        } else {
+
+            //this will remove the blank-spaces from the title and replace it with an underscore
+            fileName += ReportTitle.replace(/ /g, "_");
+
+            //Initialize file format you want csv or xls
+            var uri = 'data:text/csv;charset=utf-8,' + escape(CSV);
+
+            // Now the little tricky part.
+            // you can use either>> window.open(uri);
+            // but this will not work in some browsers
+            // or you will not get the correct file extension
+
+            //this trick will generate a temp <a /> tag
+            var link = document.createElement("a");
+            link.href = uri;
+
+            //set the visibility hidden so it will not effect on your web-layout
+            link.style = "visibility:hidden";
+            link.download = fileName + ".csv";
+
+            //this part will append the anchor tag and remove it after automatic click
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+
+        }
+
+    }
+    function JSONToCSVConvertorForNamingTool(JSONData, ReportTitle, ShowLabel) {
+        //If JSONData is not an object then JSON.parse will parse the JSON string in an Object
+        var arrData = typeof JSONData != 'object' ? JSON.parse(JSONData) : JSONData;
+
+        var CSV = '';
+        //Set Report title in first row or line
+
+        CSV += ReportTitle + '\r\n\n';
+
+        //This condition will generate the Label/Header
+        if (ShowLabel) {
+            var row = "";
+
+            //This loop will extract the label from 1st index of on array
+            for (var index in arrData[0]) {
+
+                if (index == "StartTime")
+                    index = "Date";
+                //if (index == "StopTime")
+                //    index = "StopDate";
+                if (index == "StopTime")
+                    continue;
+
+                //Now convert each value to string and comma-seprated
+                row += index + ',';
+            }
+
+            row = row.slice(0, -1);
+
+            //append Label row with line break
+            CSV += row + '\r\n';
+        }
+
+        //1st loop is to extract each row
+        for (var i = 0; i < arrData.length; i++) {
+            var row = "";
+
+            //2nd loop will extract each column and convert it in string comma-seprated
+            for (var index in arrData[i]) {
+                if (index == "StopTime")
+                    continue;
+                if (index == "StartTime") {
+                    var value = arrData[i][index];
+                    ///alert(value);
+                    var val2 = GetDate(value);
+                    //alert(value);
+                    row += '"' + val2 + '",';
+                }
+                else {
+                    row += '"' + arrData[i][index] + '",';
+                }
+            }
+
+            row.slice(0, row.length - 1);
+
+            //add a line break after each row
+            CSV += row + '\r\n';
+
+        }
+
+        //alert(CSV);
+
+        if (CSV == '') {
+            alert("Invalid data");
+            return;
+        }
+
+        //Generate a file name
+        var fileName = "MyReport_";
+        if (isIE()) {
+            var fileData = 'sep=,\r\n' + CSV;
+            var blobObject = new Blob([fileData], { type: "text/csv;charset=utf-8;" });
+            window.navigator.msSaveBlob(blobObject, 'MyReport.csv');
+        } else {
+
+            //this will remove the blank-spaces from the title and replace it with an underscore
+            fileName += ReportTitle.replace(/ /g, "_");
+
+            //Initialize file format you want csv or xls
+            var uri = 'data:text/csv;charset=utf-8,' + escape(CSV);
+
+            // Now the little tricky part.
+            // you can use either>> window.open(uri);
+            // but this will not work in some browsers
+            // or you will not get the correct file extension
+
+            //this trick will generate a temp <a /> tag
+            var link = document.createElement("a");
+            link.href = uri;
+
+            //set the visibility hidden so it will not effect on your web-layout
+            link.style = "visibility:hidden";
+            link.download = fileName + ".csv";
+
+            //this part will append the anchor tag and remove it after automatic click
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+
+        }
+
+    }
+    function JSONToCSVConvertorForMulti3D(JSONData, ReportTitle, ShowLabel) {
+        //If JSONData is not an object then JSON.parse will parse the JSON string in an Object
+        var arrData = typeof JSONData != 'object' ? JSON.parse(JSONData) : JSONData;
+
+        var CSV = '';
+        //Set Report title in first row or line
+
+        CSV += ReportTitle + '\r\n\n';
+
+        //This condition will generate the Label/Header
+        if (ShowLabel) {
+            var row = "";
+
+            //This loop will extract the label from 1st index of on array
+            for (var index in arrData[0]) {
+
+                if (index == "StartTime")
+                    index = "Date";
+                //if (index == "StopTime")
+                //    index = "StopDate";
+                if (index == "StopTime")
+                    continue;
+
+                //Now convert each value to string and comma-seprated
+                row += index + ',';
+            }
+
+            row = row.slice(0, -1);
+
+            //append Label row with line break
+            CSV += row + '\r\n';
+        }
+
+        //1st loop is to extract each row
+        for (var i = 0; i < arrData.length; i++) {
+            var row = "";
+
+            //2nd loop will extract each column and convert it in string comma-seprated
+            for (var index in arrData[i]) {
+                if (index == "StopTime")
+                    continue;
+                if (index == "StartTime") {
+                    var value = arrData[i][index];
+                    ///alert(value);
+                    var val2 = GetDate(value);
+                    //alert(value);
+                    row += '"' + val2 + '",';
+                }
+                else {
+                    row += '"' + arrData[i][index] + '",';
+                }
+            }
+
+            row.slice(0, row.length - 1);
+
+            //add a line break after each row
+            CSV += row + '\r\n';
+
+        }
+
+        //alert(CSV);
+
+        if (CSV == '') {
+            alert("Invalid data");
+            return;
+        }
+
+        //Generate a file name
+        var fileName = "MyReport_";
+        if (isIE()) {
+            var fileData = 'sep=,\r\n' + CSV;
+            var blobObject = new Blob([fileData], { type: "text/csv;charset=utf-8;" });
+            window.navigator.msSaveBlob(blobObject, 'MyReport.csv');
+        } else {
+
+            //this will remove the blank-spaces from the title and replace it with an underscore
+            fileName += ReportTitle.replace(/ /g, "_");
+
+            //Initialize file format you want csv or xls
+            var uri = 'data:text/csv;charset=utf-8,' + escape(CSV);
+
+            // Now the little tricky part.
+            // you can use either>> window.open(uri);
+            // but this will not work in some browsers
+            // or you will not get the correct file extension
+
+            //this trick will generate a temp <a /> tag
+            var link = document.createElement("a");
+            link.href = uri;
+
+            //set the visibility hidden so it will not effect on your web-layout
+            link.style = "visibility:hidden";
+            link.download = fileName + ".csv";
+
+            //this part will append the anchor tag and remove it after automatic click
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+
+        }
+
+    }
+    function JSONToCSVConvertorForSectionManager(JSONData, ReportTitle, ShowLabel) {
+        //If JSONData is not an object then JSON.parse will parse the JSON string in an Object
+        var arrData = typeof JSONData != 'object' ? JSON.parse(JSONData) : JSONData;
+
+        var CSV = '';
+        //Set Report title in first row or line
+
+        CSV += ReportTitle + '\r\n\n';
+
+        //This condition will generate the Label/Header
+        if (ShowLabel) {
+            var row = "";
+
+            //This loop will extract the label from 1st index of on array
+            for (var index in arrData[0]) {
+
+                if (index == "StartTime")
+                    index = "Date";
+                //if (index == "StopTime")
+                //    index = "StopDate";
+                if (index == "StopTime")
+                    continue;
+
+                //Now convert each value to string and comma-seprated
+                row += index + ',';
+            }
+
+            row = row.slice(0, -1);
+
+            //append Label row with line break
+            CSV += row + '\r\n';
+        }
+
+        //1st loop is to extract each row
+        for (var i = 0; i < arrData.length; i++) {
+            var row = "";
+
+            //2nd loop will extract each column and convert it in string comma-seprated
+            for (var index in arrData[i]) {
+                if (index == "StopTime")
+                    continue;
+                if (index == "StartTime") {
+                    var value = arrData[i][index];
+                    ///alert(value);
+                    var val2 = GetDate(value);
+                    //alert(value);
+                    row += '"' + val2 + '",';
+                }
+                else {
+                    row += '"' + arrData[i][index] + '",';
+                }
+            }
+
+            row.slice(0, row.length - 1);
+
+            //add a line break after each row
+            CSV += row + '\r\n';
+
+        }
+
+        //alert(CSV);
+
+        if (CSV == '') {
+            alert("Invalid data");
+            return;
+        }
+
+        //Generate a file name
+        var fileName = "MyReport_";
+        if (isIE()) {
+            var fileData = 'sep=,\r\n' + CSV;
+            var blobObject = new Blob([fileData], { type: "text/csv;charset=utf-8;" });
+            window.navigator.msSaveBlob(blobObject, 'MyReport.csv');
+        } else {
+
+            //this will remove the blank-spaces from the title and replace it with an underscore
+            fileName += ReportTitle.replace(/ /g, "_");
+
+            //Initialize file format you want csv or xls
+            var uri = 'data:text/csv;charset=utf-8,' + escape(CSV);
+
+            // Now the little tricky part.
+            // you can use either>> window.open(uri);
+            // but this will not work in some browsers
+            // or you will not get the correct file extension
+
+            //this trick will generate a temp <a /> tag
+            var link = document.createElement("a");
+            link.href = uri;
+
+            //set the visibility hidden so it will not effect on your web-layout
+            link.style = "visibility:hidden";
+            link.download = fileName + ".csv";
+
+            //this part will append the anchor tag and remove it after automatic click
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+
+        }
+
+    }
+    function JSONToCSVConvertorForTrim(JSONData, ReportTitle, ShowLabel) {
+        //If JSONData is not an object then JSON.parse will parse the JSON string in an Object
+        var arrData = typeof JSONData != 'object' ? JSON.parse(JSONData) : JSONData;
+
+        var CSV = '';
+        //Set Report title in first row or line
+
+        CSV += ReportTitle + '\r\n\n';
+
+        //This condition will generate the Label/Header
+        if (ShowLabel) {
+            var row = "";
+
+            //This loop will extract the label from 1st index of on array
+            for (var index in arrData[0]) {
+
+                if (index == "StartTime")
+                    index = "Date";
+                //if (index == "StopTime")
+                //    index = "StopDate";
+                if (index == "StopTime")
+                    continue;
+
+                //Now convert each value to string and comma-seprated
+                row += index + ',';
+            }
+
+            row = row.slice(0, -1);
+
+            //append Label row with line break
+            CSV += row + '\r\n';
+        }
+
+        //1st loop is to extract each row
+        for (var i = 0; i < arrData.length; i++) {
+            var row = "";
+
+            //2nd loop will extract each column and convert it in string comma-seprated
+            for (var index in arrData[i]) {
+                if (index == "StopTime")
+                    continue;
+                if (index == "StartTime") {
+                    var value = arrData[i][index];
+                    ///alert(value);
+                    var val2 = GetDate(value);
+                    //alert(value);
+                    row += '"' + val2 + '",';
+                }
+                else {
+                    row += '"' + arrData[i][index] + '",';
+                }
+            }
+
+            row.slice(0, row.length - 1);
+
+            //add a line break after each row
+            CSV += row + '\r\n';
+
+        }
+
+        //alert(CSV);
+
+        if (CSV == '') {
+            alert("Invalid data");
+            return;
+        }
+
+        //Generate a file name
+        var fileName = "MyReport_";
+        if (isIE()) {
+            var fileData = 'sep=,\r\n' + CSV;
+            var blobObject = new Blob([fileData], { type: "text/csv;charset=utf-8;" });
+            window.navigator.msSaveBlob(blobObject, 'MyReport.csv');
+        } else {
+
+            //this will remove the blank-spaces from the title and replace it with an underscore
+            fileName += ReportTitle.replace(/ /g, "_");
+
+            //Initialize file format you want csv or xls
+            var uri = 'data:text/csv;charset=utf-8,' + escape(CSV);
+
+            // Now the little tricky part.
+            // you can use either>> window.open(uri);
+            // but this will not work in some browsers
+            // or you will not get the correct file extension
+
+            //this trick will generate a temp <a /> tag
+            var link = document.createElement("a");
+            link.href = uri;
+
+            //set the visibility hidden so it will not effect on your web-layout
+            link.style = "visibility:hidden";
+            link.download = fileName + ".csv";
+
+            //this part will append the anchor tag and remove it after automatic click
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+
+        }
+
+    }
+    function JSONToCSVConvertorForSmartCVT(JSONData, ReportTitle, ShowLabel) {
+        //If JSONData is not an object then JSON.parse will parse the JSON string in an Object
+        var arrData = typeof JSONData != 'object' ? JSON.parse(JSONData) : JSONData;
+
+        var CSV = '';
+        //Set Report title in first row or line
+
+        CSV += ReportTitle + '\r\n\n';
+
+        //This condition will generate the Label/Header
+        if (ShowLabel) {
+            var row = "";
+
+            //This loop will extract the label from 1st index of on array
+            for (var index in arrData[0]) {
+
+                if (index == "StartTime")
+                    index = "Date";
+                //if (index == "StopTime")
+                //    index = "StopDate";
+                if (index == "StopTime")
+                    continue;
+
+                //Now convert each value to string and comma-seprated
+                row += index + ',';
+            }
+
+            row = row.slice(0, -1);
+
+            //append Label row with line break
+            CSV += row + '\r\n';
+        }
+
+        //1st loop is to extract each row
+        for (var i = 0; i < arrData.length; i++) {
+            var row = "";
+
+            //2nd loop will extract each column and convert it in string comma-seprated
+            for (var index in arrData[i]) {
+                if (index == "StopTime")
+                    continue;
+                if (index == "StartTime") {
+                    var value = arrData[i][index];
+                    ///alert(value);
+                    var val2 = GetDate(value);
+                    //alert(value);
+                    row += '"' + val2 + '",';
+                }
+                else if (index == "BlockPlacement") {
+                    row += arrData[i][index] + ',';
+                }
+                else {
+                    row += '"' + arrData[i][index] + '",';
+                }
+            }
+
+            row.slice(0, row.length - 1);
+
+            //add a line break after each row
+            CSV += row + '\r\n';
+
+        }
+
+        //alert(CSV);
+
+        if (CSV == '') {
+            alert("Invalid data");
+            return;
+        }
+
+        //Generate a file name
+        var fileName = "MyReport_";
+        if (isIE()) {
+            var fileData = 'sep=,\r\n' + CSV;
+            var blobObject = new Blob([fileData], { type: "text/csv;charset=utf-8;" });
+            window.navigator.msSaveBlob(blobObject, 'MyReport.csv');
+        } else {
+
+            //this will remove the blank-spaces from the title and replace it with an underscore
+            fileName += ReportTitle.replace(/ /g, "_");
+
+            //Initialize file format you want csv or xls
+            var uri = 'data:text/csv;charset=utf-8,' + escape(CSV);
+
+            // Now the little tricky part.
+            // you can use either>> window.open(uri);
+            // but this will not work in some browsers
+            // or you will not get the correct file extension
+
+            //this trick will generate a temp <a /> tag
+            var link = document.createElement("a");
+            link.href = uri;
+
+            //set the visibility hidden so it will not effect on your web-layout
+            link.style = "visibility:hidden";
+            link.download = fileName + ".csv";
+
+            //this part will append the anchor tag and remove it after automatic click
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+
+        }
+
+    }
+
+
+    function JSONToCSVConvertor(JSONData, ReportTitle, ShowLabel) {
+        //If JSONData is not an object then JSON.parse will parse the JSON string in an Object
+        var arrData = typeof JSONData != 'object' ? JSON.parse(JSONData) : JSONData;
+
+        var CSV = '';
+        //Set Report title in first row or line
+
+        CSV += ReportTitle + '\r\n\n';
+
+        //This condition will generate the Label/Header
+        if (ShowLabel) {
+            var row = "";
+
+            //This loop will extract the label from 1st index of on array
+            for (var index in arrData[0]) {
+
+                if (index == "StartTime")
+                    index = "StartDate";
+                if (index == "StopTime")
+                    index = "StopDate";
+
+                //Now convert each value to string and comma-seprated
+                row += index + ',';
+            }
+
+            row = row.slice(0, -1);
+
+            //append Label row with line break
+            CSV += row + '\r\n';
+        }
+
+        //1st loop is to extract each row
+        for (var i = 0; i < arrData.length; i++) {
+            var row = "";
+
+            //2nd loop will extract each column and convert it in string comma-seprated
+            for (var index in arrData[i]) {
+                if (index == "StartTime" || index == "StopTime") {
+                    var value = arrData[i][index];
+                    var val2 = GetDate(value);
+                    row += '"' + val2 + '",';
+                }
+                else {
+                    row += '"' + arrData[i][index] + '",';
+                }
+            }
+
+            row.slice(0, row.length - 1);
+
+            //add a line break after each row
+            CSV += row + '\r\n';
+        }
+
+        if (CSV == '') {
+            alert("Invalid data");
+            return;
+        }
+
+        //Generate a file name
+        var fileName = "MyReport_";
+        if (isIE()) {
+            var fileData = 'sep=,\r\n' + CSV;
+            var blobObject = new Blob([fileData], { type: "text/csv;charset=utf-8;" });
+            window.navigator.msSaveBlob(blobObject, 'MyReport.csv');
+        } else {
+
+            //this will remove the blank-spaces from the title and replace it with an underscore
+            fileName += ReportTitle.replace(/ /g, "_");
+
+            //Initialize file format you want csv or xls
+            var uri = 'data:text/csv;charset=utf-8,' + escape(CSV);
+
+            // Now the little tricky part.
+            // you can use either>> window.open(uri);
+            // but this will not work in some browsers
+            // or you will not get the correct file extension
+
+            //this trick will generate a temp <a /> tag
+            var link = document.createElement("a");
+            link.href = uri;
+
+            //set the visibility hidden so it will not effect on your web-layout
+            link.style = "visibility:hidden";
+            link.download = fileName + ".csv";
+
+            //this part will append the anchor tag and remove it after automatic click
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+
+        }
+
+    }
+
+    function GetTime(a) {
+
+        var dateString = a.substr(6);
+        var currentTime = new Date(parseInt(dateString));
+        var hour = (currentTime.getHours());
+        var min = (currentTime.getMinutes());
+        var second = currentTime.getSeconds();
+        var time = hour + ":" + min + ":" + second;
+        return time;
+
+    }
+
+    function GetDate(a) {
+
+        var dateString = a.substr(6);
+        var currentTime = new Date(parseInt(dateString));
+        var month = ("0" + (currentTime.getMonth() + 1)).slice(-2);
+        var day = ("0" + currentTime.getDate()).slice(-2);
+        var year = currentTime.getFullYear();
+        var date = month + "/" + day + "/" + year;
+        return date;
+
+    }
+
+    function isIE() {
+        ua = navigator.userAgent;
+        /* MSIE used to detect old browsers and Trident used to newer ones*/
+        var is_ie = ua.indexOf("MSIE ") > -1 || ua.indexOf("Trident/") > -1;
+
+        return is_ie;
+    }
+
+    // Multiple selection check bpx script
+    $(document).ready(function () {
+        $("#AUM_App").CreateMultiCheckBox({ name: 'Aum_App_Mul', width: '200px', defaultText: 'All', height: '250px' });
+    });
+
+    $(document).ready(function () {
+        $("#AUM_CadApps").CreateMultiCheckBox({ name: 'Aum_CadApps_Mul', width: '200px', defaultText: 'All', height: '250px' });
+    });
+
+    $(document).ready(function () {
+        $("#AUM_Region").CreateMultiCheckBox({ name: 'Aum_Region_Mul', width: '200px', defaultText: 'All', height: '250px' });
+
+    });
+
+    $(document).ready(function () {
+        $("#AUM_Hardware").CreateMultiCheckBox({ name: 'Aum_Hardware_Mul', width: '200px', defaultText: 'All', height: '250px' });
+    });
+    $(document).ready(function () {
+        $("#AUM_Domain").CreateMultiCheckBox({ name: 'Aum_Domain_Mul', width: '200px', defaultText: 'All', height: '250px' });
+    });
+    $(document).ready(function () {
+        $("#AUM_Pc").CreateMultiCheckBox({ name: 'Aum_Pc_Mul', width: '200px', defaultText: 'All', height: '250px' });
+    });
+    //UOY multiple checkbox
+    $(document).ready(function () {
+        $("#MON_Pc").CreateMultiCheckBox({ name: 'Uoy_Pc_Mul', width: '200px', defaultText: 'All', height: '250px' });
+    });
+    $(document).ready(function () {
+        $("#MON_App").CreateMultiCheckBox({ name: 'Uoy_App_Mul', width: '200px', defaultText: 'All', height: '250px' });
+    });
+    $(document).ready(function () {
+        $("#MON_CadApps").CreateMultiCheckBox({ name: 'Uoy_CadApps_Mul', width: '200px', defaultText: 'All', height: '250px' });
+    });
+    $(document).ready(function () {
+        $("#MON_Region").CreateMultiCheckBox({ name: 'Uoy_Region_Mul', width: '200px', defaultText: 'All', height: '250px' });
+    });
+    $(document).ready(function () {
+        $("#MON_Hardware").CreateMultiCheckBox({ name: 'Uoy_Hardware_Mul', width: '200px', defaultText: 'All', height: '250px' });
+    });
+    $(document).ready(function () {
+        $("#MON_Domain").CreateMultiCheckBox({ name: 'Uoy_Domain_Mul', width: '200px', defaultText: 'All', height: '250px' });
+    });
+    //CUM Multiple checkbox
+    $(document).ready(function () {
+        $("#Cum_Pc").CreateMultiCheckBox({ name: 'Cum_Pc_Mul', width: '200px', defaultText: 'All', height: '250px' });
+    });
+    $(document).ready(function () {
+        $("#Cum_App").CreateMultiCheckBox({ name: 'Cum_App_Mul', width: '200px', defaultText: 'All', height: '250px' });
+    });
+    $(document).ready(function () {
+        $("#Cum_Region").CreateMultiCheckBox({ name: 'Cum_Region_Mul', width: '200px', defaultText: 'All', height: '250px' });
+    });
+    $(document).ready(function () {
+        $("#Cum_Hardware").CreateMultiCheckBox({ name: 'Cum_Hardware_Mul', width: '200px', defaultText: 'All', height: '250px' });
+    });
+    $(document).ready(function () {
+        $("#Cum_Domain").CreateMultiCheckBox({ name: 'Cum_Domain_Mul', width: '200px', defaultText: 'All', height: '250px' });
+    });
+    //Percentage Utilization Matrix begin
+    $(document).ready(function () {
+        $("#Pum_CadApps").CreateMultiCheckBox({ name: 'Pum_CadApps_Mul', width: '200px', defaultText: 'All', height: '250px' });
+    });
+    $(document).ready(function () {
+        $("#Pum_Region").CreateMultiCheckBox({ name: 'Pum_Region_Mul', width: '200px', defaultText: 'All', height: '250px' });
+    });
+    $(document).ready(function () {
+        $("#Pum_Domain").CreateMultiCheckBox({ name: 'Pum_Domain_Mul', width: '200px', defaultText: 'All', height: '250px' });
+    });
+    $(document).ready(function () {
+        $("#Pum_Pc").CreateMultiCheckBox({ name: 'Pum_Pc_Mul', width: '200px', defaultText: 'All', height: '250px' });
+    });
+    //Percentage utilization Matrix end
+    //AppData
+    $(document).ready(function () {
+        $("#AppData_CadApps").CreateMultiCheckBox({ name: 'AppData_CadApps_Mul', width: '200px', defaultText: 'All', height: '250px' });
+    });
+    $(document).ready(function () {
+        $("#AppData_DataCategory").CreateMultiCheckBox({ name: 'AppData_DataCategory_Mul', width: '200px', defaultText: 'All', height: '250px' });
+    });
+    $(document).ready(function () {
+        $(document).on("click", ".MultiCheckBox", function () {
+            var detail = $(this).next();
+            detail.show();
+        });
+
+
+
+        $(document).on("click", ".MultiCheckBoxDetailHeader input", function (e) {
+            e.stopPropagation();
+            var hc = $(this).prop("checked");
+            $(this).closest(".MultiCheckBoxDetail").find(".MultiCheckBoxDetailBody input").prop("checked", hc);
+            $(this).closest(".MultiCheckBoxDetail").next().UpdateSelect();
+
+            //custom added for filter applied
+            var thisParent = $(this).closest('.MultiCheckBoxDetail');
+            var val = (thisParent.find(".MultiCheckBoxDetailBody input:checked").length == thisParent.find(".MultiCheckBoxDetailBody input").length);
+            thisParent.find(".MultiCheckBoxDetailHeader input").prop("checked", val);
+            //aded for filter apply text
+            if (!val) {
+                var thisDropDownDiv = thisParent[0].parentElement;
+                var mcbElement = thisDropDownDiv.getElementsByClassName("MultiCheckBox");
+                let spanElement = mcbElement[0].firstElementChild;
+                var selectedInputs = thisParent.find(".MultiCheckBoxDetailBody input:checked").length;
+                mcbElement[0].textContent = 'Filter Applied (' + selectedInputs + ')';
+                mcbElement[0].appendChild(spanElement);
+            }
+            else {
+                var thisDropDownDiv = thisParent[0].parentElement;
+                var mcbElement = thisDropDownDiv.getElementsByClassName("MultiCheckBox");
+                let spanElement = mcbElement[0].firstElementChild;
+                mcbElement[0].textContent = 'All';
+                mcbElement[0].appendChild(spanElement);
+            }
+        });
+
+        $(document).on("click", ".MultiCheckBoxDetailHeader", function (e) {
+            var inp = $(this).find("input");
+            var chk = inp.prop("checked");
+            inp.prop("checked", !chk);
+            $(this).closest(".MultiCheckBoxDetail").find(".MultiCheckBoxDetailBody input").prop("checked", !chk);
+            $(this).closest(".MultiCheckBoxDetail").next().UpdateSelect();
+
+            //custom added for filter applied
+            var thisParent = $(this).closest('.MultiCheckBoxDetail');
+            var val = (thisParent.find(".MultiCheckBoxDetailBody input:checked").length == thisParent.find(".MultiCheckBoxDetailBody input").length);
+            thisParent.find(".MultiCheckBoxDetailHeader input").prop("checked", val);
+            //aded for filter apply text
+            if (!val) {
+                var thisDropDownDiv = thisParent[0].parentElement;
+                var mcbElement = thisDropDownDiv.getElementsByClassName("MultiCheckBox");
+                let spanElement = mcbElement[0].firstElementChild;
+                var selectedInputs = thisParent.find(".MultiCheckBoxDetailBody input:checked").length;
+                mcbElement[0].textContent = 'Filter Applied (' + selectedInputs + ')';
+                mcbElement[0].appendChild(spanElement);
+            }
+            else {
+
+                var thisDropDownDiv = thisParent[0].parentElement;
+                var mcbElement = thisDropDownDiv.getElementsByClassName("MultiCheckBox");
+                let spanElement = mcbElement[0].firstElementChild;
+                mcbElement[0].textContent = 'All';
+                mcbElement[0].appendChild(spanElement);
+            }
+
+        });
+
+        $(document).on("click", ".MultiCheckBoxDetail .cont input", function (e) {
+            e.stopPropagation();
+            $(this).closest(".MultiCheckBoxDetail").next().UpdateSelect();
+
+            var thisParent = $(this).closest('.MultiCheckBoxDetail');
+            var val = (thisParent.find(".MultiCheckBoxDetailBody input:checked").length == thisParent.find(".MultiCheckBoxDetailBody input").length);
+            thisParent.find(".MultiCheckBoxDetailHeader input").prop("checked", val);
+
+            //aded for filter apply text
+            if (!val) {
+                var thisDropDownDiv = thisParent[0].parentElement;
+                var mcbElement = thisDropDownDiv.getElementsByClassName("MultiCheckBox");
+                let spanElement = mcbElement[0].firstElementChild;
+                var selectedInputs = thisParent.find(".MultiCheckBoxDetailBody input:checked").length;
+                mcbElement[0].textContent = 'Filter Applied (' + selectedInputs + ')';
+                mcbElement[0].appendChild(spanElement);
+            }
+            else {
+                //alert("ALL Selected");
+
+                var thisDropDownDiv = thisParent[0].parentElement;
+                var mcbElement = thisDropDownDiv.getElementsByClassName("MultiCheckBox");
+                let spanElement = mcbElement[0].firstElementChild;
+                mcbElement[0].textContent = 'All';
+                mcbElement[0].appendChild(spanElement);
+
+            }
+        });
+
+
+
+        $(document).on("click", ".MultiCheckBoxDetail .cont", function (e) {
+            var inp = $(this).find("input");
+            var chk = inp.prop("checked");
+            inp.prop("checked", !chk);
+
+            var multiCheckBoxDetail = $(this).closest(".MultiCheckBoxDetail");
+            var multiCheckBoxDetailBody = $(this).closest(".MultiCheckBoxDetailBody");
+            multiCheckBoxDetail.next().UpdateSelect();
+
+            var thisParent = $(this).closest('.MultiCheckBoxDetail');
+
+            var val = (thisParent.find(".MultiCheckBoxDetailBody input:checked").length == thisParent.find(".MultiCheckBoxDetailBody input").length);
+            thisParent.find(".MultiCheckBoxDetailHeader input").prop("checked", val);
+
+            //aded for filter apply text
+            if (!val) {
+                var thisDropDownDiv = thisParent[0].parentElement;
+                var mcbElement = thisDropDownDiv.getElementsByClassName("MultiCheckBox");
+                let spanElement = mcbElement[0].firstElementChild;
+                var selectedInputs = thisParent.find(".MultiCheckBoxDetailBody input:checked").length;
+                mcbElement[0].textContent = 'Filter Applied (' + selectedInputs + ')';
+                mcbElement[0].appendChild(spanElement);
+            }
+            else {
+                //alert("ALL Selected");
+
+                var thisDropDownDiv = thisParent[0].parentElement;
+                var mcbElement = thisDropDownDiv.getElementsByClassName("MultiCheckBox");
+                let spanElement = mcbElement[0].firstElementChild;
+                mcbElement[0].textContent = 'All';
+                mcbElement[0].appendChild(spanElement);
+
+            }
+
+        });
+
+        $(document).mouseup(function (e) {
+            var container = $(".MultiCheckBoxDetail");
+            if (!container.is(e.target) && container.has(e.target).length === 0) {
+                container.hide();
+            }
+        });
+    });
+
+
+    var defaultMultiCheckBoxOption = { name: 'thisMultiSelectCB', width: '220px', defaultText: 'Select Below', height: '200px' };
+
+    jQuery.fn.extend({
+        CreateMultiCheckBox: function (options) {
+
+            var localOption = {};
+            localOption.width = (options != null && options.width != null && options.width != undefined) ? options.width : defaultMultiCheckBoxOption.width;
+            localOption.defaultText = (options != null && options.defaultText != null && options.defaultText != undefined) ? options.defaultText : defaultMultiCheckBoxOption.defaultText;
+            localOption.height = (options != null && options.height != null && options.height != undefined) ? options.height : defaultMultiCheckBoxOption.height;
+
+            localOption.name = (options != null && options.name != null && options.name != undefined) ? options.name : defaultMultiCheckBoxOption.name;
+
+
+            this.hide();
+            this.attr("multiple", "multiple");
+            var divSel = $("<div class='MultiCheckBox'>" + localOption.defaultText + "<span class='k-icon k-i-arrow-60-down'><svg aria-hidden='true' focusable='false' data-prefix='fas' data-icon='sort-down' role='img' xmlns='http://www.w3.org/2000/svg' viewBox='0 0 320 512' class='svg-inline--fa fa-sort-down fa-w-10 fa-2x'><path fill='currentColor' d='M41 288h238c21.4 0 32.1 25.9 17 41L177 448c-9.4 9.4-24.6 9.4-33.9 0L24 329c-15.1-15.1-4.4-41 17-41z' class=''></path></svg></span></div>").insertBefore(this);
+            divSel.css({ "width": localOption.width });
+
+            var detail = $("<div class='MultiCheckBoxDetail'><div class='MultiCheckBoxDetailHeader'><input type='checkbox' name='" + localOption.name + "' class='mulinput' value='ALL' checked='true' /><div>All</div></div><div class='MultiCheckBoxDetailBody'></div></div>").insertAfter(divSel);
+            detail.css({ "width": parseInt(options.width) + 10, "max-height": localOption.height });
+            var multiCheckBoxDetailBody = detail.find(".MultiCheckBoxDetailBody");
+
+            this.find("option").each(function () {
+                var val = $(this).attr("value");
+
+                if (val == undefined)
+                    val = '';
+
+                multiCheckBoxDetailBody.append("<div class='cont'><div><input type='checkbox' name='" + localOption.name + "' class='mulinput' value='" + val + "'checked='true'  /></div><div>" + $(this).text() + "</div></div>");
+            });
+
+            multiCheckBoxDetailBody.css("max-height", (parseInt($(".MultiCheckBoxDetail").css("max-height")) - 28) + "px");
+        },
+        UpdateSelect: function () {
+            var arr = [];
+            var arr1 = [];
+
+            this.prev().find(".mulinput:checked").each(function () {
+                arr.push($(this).val());
+            });
+
+            this.val(arr);
+            //-------
+
+            //this.prev().find(".cont").prop("checked", true).each(function () {
+            //    arr1.push($(this).text());
+            //});
+            //this.text(arr1);
+            //var thisParent = $(this).closest('.MultiCheckBox');
+            //thisParent.find('.MultiCheckBoxDetailHeader').text(arr1.join(', '));
+            //alert(arr1)
+            this.prev().find(".cont").prop("checked", true).each(function () {
+                arr1.push($(this).text());
+            });
+            this.text(arr1);
+            var thisParent = $(this).closest('.MultiCheckBox');
+            thisParent.innerText = arr1;
+            //alert(arr1);
+
+        },
+    });
+
+    //Craeted by Ibrahim for arrow update dynamically
+    function AddArrow(mcbDiv) {
+        var spanElement = document.createElement("span");
+        spanElement.setAttribute("class", "k-icon k-i-arrow-60-down");
+
+        var svgElement = document.createElement("svg");
+        svgElement.setAttribute("aria-hidden", "true");
+        svgElement.setAttribute("focusable", "false");
+        svgElement.setAttribute("data-prefix", "fas");
+        svgElement.setAttribute("data-icon", "sort-down");
+        svgElement.setAttribute("role", "img");
+        svgElement.setAttribute("xmlns", "http://www.w3.org/2000/svg");
+        svgElement.setAttribute("viewBox", "0 0 320 512");
+        svgElement.setAttribute("class", "svg-inline--fa fa-sort-down fa-w-10 fa-2x");
+
+        var pathElement = document.createElement("path");
+        pathElement.setAttribute("fill", "currentColor");
+        pathElement.setAttribute("d", "M41 288h238c21.4 0 32.1 25.9 17 41L177 448c-9.4 9.4-24.6 9.4-33.9 0L24 329c-15.1-15.1-4.4-41 17-41z");
+        //pathElement.setAttribute("d", "M12 20c-.2 0-.4-.1-.6-.3l-7-7c-.4-.4-.4-1 0-1.4s1-.4 1.4 0L12 17.6l5.2-5.3c.4-.4 1-.4 1.4 0s.4 1 0 1.4l-7 7c-.2.2-.4.3-.6.3z");
+        pathElement.setAttribute("class", "");
+
+        svgElement.appendChild(pathElement);
+        spanElement.appendChild(svgElement);
+
+        mcbDiv.appendChild(spanElement);
+
+
+    }
+
+    $(document).ready(function () {
+
+    // MON pair
+    wireRegionDomainMultiSelect({
+        regionSelectId: 'MON_Region',
+        regionInputName: 'Uoy_Region_Mul',
+        domainSelectId: 'MON_Domain',
+        domainInputName: 'Uoy_Domain_Mul',
+        ajaxUrl: '@Url.Action("GetDomainsByRegions")'
+    });
+
+    // CUM pair
+    wireRegionDomainMultiSelect({
+        regionSelectId: 'Cum_Region',
+        regionInputName: 'Cum_Region_Mul',
+        domainSelectId: 'Cum_Domain',
+        domainInputName: 'Cum_Domain_Mul',
+        ajaxUrl: '@Url.Action("GetDomainsByRegions")'
+    });
+
+    // AUM pair
+    wireRegionDomainMultiSelect({
+        regionSelectId: 'AUM_Region',
+        regionInputName: 'Aum_Region_Mul',
+        domainSelectId: 'AUM_Domain',
+        domainInputName: 'Aum_Domain_Mul',
+        ajaxUrl: '@Url.Action("GetDomainsByRegions")'
+    });
+    // PUM pair
+    wireRegionDomainMultiSelect({
+        regionSelectId: 'Pum_Region',
+        regionInputName: 'Pum_Region_Mul',
+        domainSelectId: 'Pum_Domain',
+        domainInputName: 'Pum_Domain_Mul',
+        ajaxUrl: '@Url.Action("GetDomainsByRegions")'
+    });
+
+});
+    function wireRegionDomainMultiSelect(config) {
+
+        var regionSelectId = config.regionSelectId;
+        var regionInputName = config.regionInputName;
+        var domainSelectId = config.domainSelectId;
+        var domainInputName = config.domainInputName;
+
+        function destroyDomainMultiCheckBox() {
+            $('.MultiCheckBox').filter(function () {
+                return $(this).next('.MultiCheckBoxDetail')
+                    .find('input[name="' + domainInputName + '"]').length > 0;
+            }).remove();
+
+            $('.MultiCheckBoxDetail').filter(function () {
+                return $(this)
+                    .find('input[name="' + domainInputName + '"]').length > 0;
+            }).remove();
+        }
+
+        function recreateDomainMultiCheckBox() {
+            $('#' + domainSelectId).CreateMultiCheckBox({
+                name: domainInputName,
+                width: '200px',
+                defaultText: 'All',
+                height: '250px'
+            });
+        }
+
+        // Region change listener
+        $(document).on('change', 'input[name="' + regionInputName + '"]', function () {
+
+            var selectedRegions = [];
+
+            $('input[name="' + regionInputName + '"]:checked').each(function () {
+                if ($(this).val() !== 'ALL') {
+                    selectedRegions.push($(this).val());
+                }
+            });
+
+            destroyDomainMultiCheckBox();
+            $('#' + domainSelectId).empty();
+
+            if (selectedRegions.length === 0) {
+                recreateDomainMultiCheckBox();
+                return;
+            }
+
+            $.ajax({
+                url: config.ajaxUrl,
+                type: 'POST',
+                traditional: true,
+                data: { regions: selectedRegions },
+                success: function (data) {
+
+                    $.each(data, function (i, item) {
+                        $('#' + domainSelectId).append(
+                            $('<option></option>')
+                                .val(item.Value)
+                                .text(item.Text)
+                        );
+                    });
+
+                    recreateDomainMultiCheckBox();
+                }
+            });
+        });
+    }
+
+
+</script>
+
+<script type="text/javascript">
+
+
+</script>
+
+<style>
+    .loading-message {
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+        font-size: 25px;
+        color: cornflowerblue;
+        /* Adjust the font size as needed
+        opacity:0; */
+    }
+
+    #Loader_uoy {
+        text-align: center;
+        margin-top: 200px;
+    }
+
+        #Loader_uoy img {
+            margin: 0 auto;
+            display: block;
+        }
+
+        #Loader_uoy p {
+            color: deepskyblue;
+            font-size: 24px;
+            font-weight: bold;
+            margin-top: 20px; /* Adjust the value to set the space between image and text */
+            margin-left: 20px;
+        }
+
+    #Loader_cum {
+        text-align: center;
+        margin-top: 200px;
+    }
+
+        #Loader_cum img {
+            margin: 0 auto;
+            display: block;
+        }
+
+        #Loader_cum p {
+            color: deepskyblue;
+            font-size: 24px;
+            font-weight: bold;
+            margin-top: 20px; /* Adjust the value to set the space between image and text */
+            margin-left: 20px;
+        }
+
+    #Loader_aum {
+        text-align: center;
+        margin-top: 200px;
+    }
+
+        #Loader_aum img {
+            margin: 0 auto;
+            display: block;
+        }
+
+        #Loader_aum p {
+            color: deepskyblue;
+            font-size: 24px;
+            font-weight: bold;
+            margin-top: 20px; /* Adjust the value to set the space between image and text */
+            margin-left: 20px;
+        }
+
+    #chartdiv5 {
+        width: 100%;
+        height: 500px;
+        margin-right: 45px;
+        margin-left: -20px;
+    }
+
+    #chartdiv6 {
+        width: 100%;
+        height: 500px;
+        margin-right: 45px;
+        margin-left: -20px;
+    }
+
+    #chartdiv7 {
+        width: 100%;
+        height: 550px;
+        margin-right: 45px;
+        margin-left: -20px;
+    }
+
+    #chartdiv {
+        width: 100%;
+        height: 500px;
+        margin-right: 45px;
+        margin-left: -20px;
+    }
+
+    #PDF-5 {
+        width: 100%;
+        font-size: 18px;
+    }
+
+    #JPG-5 {
+        width: 100%;
+        font-size: 18px;
+    }
+
+    #PDF-6 {
+        width: 100%;
+        font-size: 18px;
+    }
+
+    #JPG-6 {
+        width: 100%;
+        font-size: 18px;
+    }
+
+    #PDF-7 {
+        width: 100%;
+        font-size: 18px;
+    }
+
+    #JPG-7 {
+        width: 100%;
+        font-size: 18px;
+    }
+
+    Label {
+        font-family: Calibri;
+        font-size: 15px;
+    }
+
+    .btn {
+        background-color: #f4511e;
+        border: none;
+        color: white;
+        padding: 10px 20px;
+        text-align: center;
+        font-size: 16px;
+        margin: 4px 2px;
+        opacity: 0.6;
+        transition: 0.3s;
+        border-radius: 10px;
+    }
+
+        .btn:hover {
+            opacity: 1
+        }
+
+    .ddlList {
+        background-color: cornflowerblue;
+        color: white;
+        border-radius: 10px;
+        width: 200px;
+        padding: 10px 20px;
+        text-align: center;
+        font-size: 15px;
+        font-family: Calibri;
+        margin: 4px 2px;
+        opacity: 1.0;
+        transition: 0.3s;
+        height: 40px;
+    }
+
+    select[multiple].ddlListtest {
+        background-color: cornflowerblue;
+        color: white;
+        border-radius: 10px;
+        text-align: center;
+        font-size: 15px;
+        font-family: Calibri;
+        -webkit-appearance: menulist-button;
+        /*appearance: menulist-button;*/
+        /*border: 1px solid #ccc;*/
+        padding: 5px;
+        width: 200px;
+        height: 60px;
+        opacity: 0.7;
+        transition: 0.3s;
+    }
+
+    .ddllistaum {
+        background-color: cornflowerblue;
+        color: white;
+        border-radius: 10px;
+        width: 100px;
+        /*padding: 10px 20px;*/
+        text-align: left;
+        font-size: 15px;
+        font-family: Calibri;
+        margin: 4px 2px;
+        opacity: 1.0;
+        transition: 0.3s;
+        height: 40px;
+        /*position: absolute;*/
+        left: 1275px;
+    }
+
+    .ddllistappdata {
+        background-color: cornflowerblue;
+        color: white;
+        border-radius: 10px;
+        width: 100px;
+        /*padding: 10px 20px;*/
+        text-align: left;
+        font-size: 15px;
+        font-family: Calibri;
+        margin: 4px 2px;
+        opacity: 1.0;
+        transition: 0.3s;
+        height: 40px;
+        /*position: absolute;*/
+        /*left: 1275px;*/
+    }
+
+    .ddllistcad {
+        background-color: cornflowerblue;
+        color: white;
+        border-radius: 10px;
+        width: 100px;
+        /*padding: 10px 20px;*/
+        text-align: left;
+        font-size: 15px;
+        font-family: Calibri;
+        margin: 4px 2px;
+        opacity: 1.0;
+        transition: 0.3s;
+        height: 40px;
+        /*position: absolute;*/
+        left: 1025px;
+    }
+
+
+    .ddlList:hover {
+        opacity: 1;
+    }
+
+
+    .MultiCheckBox {
+        /*border: 1px solid #e2e2e2;
+        padding: 5px;
+        border-radius: 4px;
+        cursor: pointer;*/
+        background-color: cornflowerblue;
+        color: white;
+        border-radius: 10px;
+        width: 100px;
+        padding: 10px 20px;
+        text-align: center;
+        font-size: 15px;
+        font-family: Calibri;
+        margin: 4px 2px;
+        opacity: 1.0;
+        transition: 0.3s;
+        height: 40px;
+    }
+
+        .MultiCheckBox .k-icon {
+            font-size: 15px;
+            float: right;
+            font-weight: lighter;
+            margin-top: -7px;
+            height: 10px;
+            width: 14px;
+            color: white;
+        }
+
+    .MultiCheckBoxDetail {
+        display: none;
+        position: absolute;
+        border: 1px solid #e2e2e2;
+        overflow-y: hidden;
+        opacity: 2.0;
+        z-index: 1;
+    }
+
+    .MultiCheckBoxDetailBody {
+        overflow-y: auto;
+        background-color: cornflowerblue;
+        opacity: 2.0;
+    }
+
+    .MultiCheckBoxDetail .cont {
+        clear: both;
+        overflow: hidden;
+        padding: 2px;
+        color: white;
+        font-family: Calibri;
+        opacity: 2.0;
+    }
+
+        .MultiCheckBoxDetail .cont:hover {
+            background-color: dimgrey;
+        }
+
+    .MultiCheckBoxDetailBody > div > div {
+        float: left;
+    }
+
+    .MultiCheckBoxDetail > div > div:nth-child(1) {
+    }
+
+    .MultiCheckBoxDetailHeader {
+        overflow: hidden;
+        position: relative;
+        height: 28px;
+        background-color: cornflowerblue;
+        opacity: 2.0;
+    }
+
+        .MultiCheckBoxDetailHeader > input {
+            position: absolute;
+            top: 4px;
+            left: 3px;
+        }
+
+        .MultiCheckBoxDetailHeader > div {
+            position: absolute;
+            top: 5px;
+            left: 24px;
+            color: #fff;
+        }
+
+        .MultiCheckBoxDetailHeader:hover {
+            background-color: dimgrey;
+        }
+</style>
+
+

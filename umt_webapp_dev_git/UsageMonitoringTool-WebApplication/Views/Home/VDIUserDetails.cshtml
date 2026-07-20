@@ -1,0 +1,183 @@
+﻿@model IEnumerable<UsageMonitoringTool_WebApplication.Models.VDIUserDetail>
+
+@{
+    ViewBag.Title = "VDI users";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<div class="container-fluid">
+    <h2>List of VDI users</h2>
+    <div class="right-align">
+        @Html.ActionLink("Add New", "CreateVDIUserDetails", null, new { @class = "btnCreate" })
+    </div>    
+    <div class="row mb-2">
+        <div class="col-4">
+            <div class="input-group">
+                <span class="input-group-text">User Id</span>
+                <input type="text" id="inpUserId" class="form-control"
+                       placeholder="Search for User Id"
+                       onkeyup="filterData()">
+            </div>
+        </div>
+
+        <div class="col-4">
+            <div class="input-group">
+                <span class="input-group-text">Region</span>
+                <input type="text" id="inpRegion" class="form-control"
+                       placeholder="Search for Region"
+                       onkeyup="filterData()">
+            </div>
+        </div>
+        <div class="col-4">
+            <div class="input-group">
+                <span class="input-group-text">Domain</span>
+                <input type="text" id="inpDomain" class="form-control"
+                       placeholder="Search for Domain"
+                       onkeyup="filterData()">
+            </div>
+        </div>
+    </div>
+
+
+    <br /><br />
+    <table class="table" id="userData">
+        <tr>
+            <th>
+                @Html.DisplayNameFor(model => model.UserId)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.Region)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.Domain)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.CreatedDate)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.CreatedBy)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.ModifiedDate)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.ModifiedBy)
+            </th>
+            <th></th>
+        </tr>
+
+        @foreach (var item in Model)
+        {
+            <tr>
+                <td>
+                    @Html.DisplayFor(modelItem => item.UserId)
+                </td>
+                <td>
+                    @Html.DisplayFor(modelItem => item.Region)
+                </td>
+                <td>
+                    @Html.DisplayFor(modelItem => item.Domain)
+                </td>
+                <td>
+                    @Html.DisplayFor(modelItem => item.CreatedDate)
+                </td>
+                <td>
+                    @Html.DisplayFor(modelItem => item.CreatedBy)
+                </td>
+                <td>
+                    @Html.DisplayFor(modelItem => item.ModifiedDate)
+                </td>
+                <td>
+                    @Html.DisplayFor(modelItem => item.ModifiedBy)
+                </td>
+                <td>
+                    @Html.ActionLink("Edit", "EditVDIUserDetails", new { id = item.SrNo }, new { @class = "actionlink" }) |
+                    @*@Html.ActionLink("Details", "DetailVDIUserDetails", new { id = item.SrNo }, new { @class = "actionlink" })*@
+                    @Html.ActionLink("Delete", "DeleteVDIUserDetails", new { id = item.SrNo }, new { @class = "actionlink" })
+                </td>
+            </tr>
+        }
+
+    </table>
+</div>
+<script>
+
+    $(document).ready(function () {
+        var $j = jQuery.noConflict();
+        $j('#aboutnav').removeClass('active');
+        $j('#homenav').removeClass('active');
+        $j('#usernav').addClass('active');
+        $j('#domainnav').removeClass('active');
+    });
+
+    function filterData() {
+        var input, filterUser, filterDomain, filterRegion, table, tr, tdUser, tdDomain, tdRegion, i,
+            txtUserValue, txtDomainValue, txtRegionValue;
+        input = document.getElementById("inpUserId");
+        filterUser = input.value.toUpperCase();
+        input = document.getElementById("inpDomain");
+        filterDomain = input.value.toUpperCase();
+        input = document.getElementById("inpRegion");
+        filterRegion = input.value.toUpperCase();
+
+        table = document.getElementById("userData");
+        tr = table.getElementsByTagName("tr");
+        for (i = 0; i < tr.length; i++) {
+            tdUser = tr[i].getElementsByTagName("td")[0];
+            tdRegion = tr[i].getElementsByTagName("td")[1];
+            tdDomain = tr[i].getElementsByTagName("td")[2];
+            if (tdUser && tdRegion && tdDomain) {
+                txtUserValue = tdUser.textContent || tdUser.innerText;
+                txtDomainValue = tdDomain.textContent || tdDomain.innerText;
+                txtRegionValue = tdRegion.textContent || tdRegion.innerText;
+
+                if (txtUserValue.toUpperCase().indexOf(filterUser) > -1 &&
+                    txtDomainValue.toUpperCase().indexOf(filterDomain) > -1 &&
+                    txtRegionValue.toUpperCase().indexOf(filterRegion) > -1) {
+                    tr[i].style.display = "";
+                } else {
+                    tr[i].style.display = "none";
+                }
+            }
+        }
+    }
+</script>
+<style>
+    .btnCreate {
+        background-color: cornflowerblue;
+        color: white;
+        border-radius: 10px;
+        width: 200px;
+        padding: 10px 20px;
+        text-align: center;
+        font-size: 15px;
+        font-family: Calibri;
+        margin: 4px 2px;
+        opacity: 1.0;
+        transition: 0.3s;
+        height: 40px;
+    }
+
+        .btnCreate:hover {
+            opacity: 1; /* Darker blue on hover */
+        }
+
+    .right-align {
+        text-align: right;
+    }
+
+    .tableButtons {
+        background-color: cornflowerblue;
+        color: white;
+        border-radius: 8px;
+        width: 100px;
+        padding: 10px 20px;
+        text-align: center;
+        font-size: 12px;
+        font-family: Calibri;
+        margin: 4px 2px;
+        opacity: 1.0;
+        transition: 0.3s;
+        height: 10px;
+    }
+</style>
